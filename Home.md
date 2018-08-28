@@ -1,1 +1,14 @@
-Welcome to the zhao_Note wiki!
+1: 学会并运用到实践中来在gitHub上记笔记
+
+   ---了解github教程
+
+     ----gitHub 已经注册了；
+   
+  -----想法解决wiki中无法添加图片的问题
+ 
+2. 观看架构师视屏之 多线程。 并记笔记
+
+3. 观看黑马的设计模式视屏
+
+4。 了解eclipse上的proxy-dowm项目
+
