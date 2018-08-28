@@ -39,16 +39,43 @@
 
 其他的配置可以通过  选项--option中进行修改
 
-  b: git brash 配置完了，就要配置git（让他能与gitHub上的仓库连接）
+  b: 配置git（让他能与gitHub上的仓库连接） 
     
 	 先在本地磁盘中建立一个仓库repository(为避免问题，目录名中不要包含英文)
 	 
 	 通过cd命令进入仓库目录，然后通过git init把这个文件夹变成Git可管理的仓库 (成功后仓库目录下会有.git 这个隐藏文件夹)
 	 
+	 配置个人信息
+		 git config --global user.name "runoob"
+         git config --global user.email test@runoob.com
 	 
+	 配置 SSH KEY：
+	     先看C:\Users\Administrator\.ssh目录下存不存在id_rsa和id_rsa.pub这两个文件
+		 如果没有就使用ssh-keygen -t rsa -C "youremail@example.com"命令创建
+		 登录Github,点进Settings——》的SSH and GPG KEYS———》New SSH key，
+		 然后Title里面随便填，再把刚才id_rsa.pub里面的内容复制到Title下面的Key里。完成了SSH Key的加密。
 	 
+	 让Github上创建好Git仓库与和本地仓库进行关联
+		 git remote add origin https://github.com/zhaodahan/zhao_Note.git
+		 
+	 后面的就是git 提交这些基本的操作了
+	 
+         git add .把项目添加到仓库
+		 
+		 git commit -m "注释内容"把项目提交到仓库
+		 
+		 git push origin master 把本地仓库的项目推送到远程仓库
+		 
+		 git pull origin master 从远程获取最新版本并merge到本地
+		 
+		 git fetch origin master 是从远程获取最新版本到本地，不会自动merge
+		 
   
-  
+  C : 将gitHub上的wiki clone到本地，本地编辑完之后更新到gitHub repository；
+       
+         git clone https://github.com/zhaodahan/zhao_Note.wiki.git
+          
+		 本地操作完之后 push到远程仓库。 (这里需要注意的是当我们更新本地wiki的时候，需要cd 到本地仓库对应的文件夹下去)
   
   
   
