@@ -78,7 +78,19 @@
 		 本地操作完之后 push到远程仓库。 (这里需要注意的是当我们更新本地wiki的时候，需要cd 到本地仓库对应的文件夹下去)
   
   
-  
+  D: 如果在远程仓库建立的新的文件
+			暂时没有想到更好的方法。
+		    这里能实现的方法是线解除现有仓库与远程仓库的关联。
+			然后在wiki中与wiki.git 进行关联
+			最后再更新。
+			
+			git remote rm origin
+			
+			git remote add origin https://github.com/zhaodahan/zhao_Note.wiki.git
+			
+			git pull origin master
+
+			(这样比较麻烦，每次如果要更新zhao_Note.git 下的，就要重新绑定关联)
   
   
   
