@@ -12,3 +12,5 @@
 
 4。 了解eclipse上的proxy-dowm项目
 
+5。 总结 遇到的坑 left join group  sum
+
