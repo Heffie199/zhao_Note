@@ -12,7 +12,7 @@
 2. 并行重要的几个概念
 
 		同步和异步
-		![Image text]( https://github.com/zhaodahan/zhao_Note/blob/master/img-storage/%E5%90%8C%E6%AD%A5%E5%BC%82%E6%AD%A5.JPG)
+                ![同步与异步的理解图](https://github.com/zhaodahan/zhao_Note/blob/master/img-storage/%E5%90%8C%E6%AD%A5%E5%BC%82%E6%AD%A5.JPG)
 		
 		并发和并行
 		
