@@ -2,7 +2,7 @@
 
   如何使用gitHub的wiki来记笔记
   
- 1： 注册gitHub， 下载git客户端
+  A： 注册gitHub， 下载git客户端
   （如果是第一次安装git ---这里我使用的是Windows平台的git brash）
     a. 配置git brash: 
 	
@@ -92,9 +92,15 @@
 
 			(这样比较麻烦，每次如果要更新zhao_Note.git 下的，就要重新绑定关联)
   
-  
-  
-  
+  E: 如何在wiki 笔记中插入图片
+		wiki笔记的md文件中存在可以引用图片的规则
+        1： md文件中引用的图片不是图片文件而是图片链接
+        2： 链接格式是： ！[图片无法显示时文字描述]（引用的图片链接）
+		eg:![同步与异步的理解图](https://github.com/zhaodahan/zhao_Note/blob/master/img-storage/%E5%90%8C%E6%AD%A5%E5%BC%82%E6%AD%A5.JPG)		
+        
+		3：需要注意的这里的图片引用的是相对路径链接--在wiki中需要在wiki.git 下建立存储图片的文件夹
+		4：具体的例子：https://blog.csdn.net/ge23456789/article/details/77338242
+		5：使用链接需要注意一点：图片链接不能放在详情区域，（需要顶行放置）
   
   
   

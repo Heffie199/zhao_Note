@@ -1,7 +1,7 @@
 多线程相关笔记
 
 1: 为什么需要并行（多线程）
-		1. 业务需求
+			1. 业务需求
 		
 		 eg: 一个http服务器同一时刻需要去处理多个客户端的请求。 通常的做法是为每个客户端去开启一个线程。
 		
@@ -11,8 +11,8 @@
 
 2. 并行重要的几个概念
 
-		同步和异步
-                ![同步与异步的理解图](https://github.com/zhaodahan/zhao_Note/blob/master/img-storage/%E5%90%8C%E6%AD%A5%E5%BC%82%E6%AD%A5.JPG)
+同步和异步
+![同步与异步的理解图](https://github.com/zhaodahan/zhao_Note/blob/master/img-storage/%E5%90%8C%E6%AD%A5%E5%BC%82%E6%AD%A5.JPG)
 		
 		并发和并行
 		
