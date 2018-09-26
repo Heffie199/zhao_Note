@@ -228,11 +228,23 @@ CAS的原理
 
  当多个线程同时使用CAS操作一个变量时，只有一个会胜出，并成功更新。 其余都失败，失败的不会被挂起，仅被告知失败，并允许再次尝试，和放弃操作。cas只是由一条CPU指令完成，是指令级的操作。
 
+# 6. 多线程工具类
 
+都是synchronized关键字的升级版
 
+1.ReentrantLock
 
+2.condition 
 
+3.semaphore
 
+4.ReadWriteLock
+
+5.CountDownLatch(倒数计时器)
+
+6.CyclicBarrier（循环栅栏）
+
+7.LockSupport 
 
 
 
