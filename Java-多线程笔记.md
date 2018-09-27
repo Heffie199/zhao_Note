@@ -232,9 +232,125 @@ CAS的原理
 
 都是synchronized关键字的升级版
 
-1.ReentrantLock
+## 1.ReentrantLock
 
-2.condition 
+ReentrantLock（重入锁）是synchronized的升级版，但是两者在性能上并无太大的差异，只是ReentantLock具有更完善的功能：可中断响应、锁申请等待限时、公平锁等。 如果并发量较少就不是一定需要使用ReentrantLock。
+
+~~~java
+public static ReentrantLock lock = new ReentrantLock();
+public void run() {
+        for (int j = 0; j < 10000; j++) {
+            lock.lock();  // 看这里就可以
+            //lock.lock(); ①
+            try {
+                i++;
+            } finally { //try --finnally这是一种标准写法
+                lock.unlock(); // 看这里就可以
+                //lock.unlock();②
+            }
+        }
+    }
+使用重入锁加锁是一种显式的操作。其对逻辑控制的灵活性远大于synchronized关键字，但是他并不像synchronized关键字那样会自己unLock。 ReentrantLock 需要自己显式的来解锁。并且加锁与解锁的次数要一样，这里就引出了“重”入的概念。重入锁对一个线程可以加几次锁(但是需要注意的是： 加锁次数需要和解锁次数一样，加了多少道锁就需要解多少锁)。
+
+~~~
+
+
+
+### 中断
+
+相对于synchronized关键字来说，要么获取到锁执行到底，要么持续等待，中间不能中断执行。但是如果加锁之后这个线程陷入死循环，这时导致其他的线程无法获取资源而陷入死锁，这时就需要中断线程，synchronized关键字是无法解决这种情况的。而重入锁的中断响应就能解决这种情况。譬如一个正在等待锁的线程被“告知”无需再继续等待下去，停止工作。
+
+~~~java
+public class KillDeadlock implements Runnable{
+    public static ReentrantLock lock1 = new ReentrantLock();
+    public static ReentrantLock lock2 = new ReentrantLock();
+    int lock;
+
+    public KillDeadlock(int lock) {
+        this.lock = lock;
+    }
+
+    @Override
+    public void run() {
+        try {
+            if (lock == 1) {
+                //t1线程的代码
+                lock1.lockInterruptibly();  // 以可以响应中断的方式加锁
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {}
+                lock2.lockInterruptibly();
+            } else {
+                 //t2线程的代码
+                lock2.lockInterruptibly();  // 以可以响应中断的方式加锁
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {}
+                lock1.lockInterruptibly();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            if (lock1.isHeldByCurrentThread()) lock1.unlock();  // 注意判断方式
+            if (lock2.isHeldByCurrentThread()) lock2.unlock();
+            System.err.println(Thread.currentThread().getId() + "退出！");
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        KillDeadlock deadLock1 = new KillDeadlock(1);
+        KillDeadlock deadLock2 = new KillDeadlock(2);
+        Thread t1 = new Thread(deadLock1);
+        Thread t2 = new Thread(deadLock2);
+        t1.start();t2.start();
+        Thread.sleep(1000);
+        t2.interrupt(); // ③
+    }
+}
+
+---------------------
+ 注意： 
+1：lock1.lockInterruptibly(); 只有加这种可中断锁才能监听到线程中断信号，跑出InterruptedException异常，进而结束线程。
+2： 这里需要注意的事，重入锁可以加多次锁是有条件的。
+重入锁ReentrantLock，顾名思义，就是支持重进入的锁，它表示该锁能够支持一个线程对资源的重复加锁。
+一个线程中能对同一把锁加多次，但是如果要加其他的锁，则其他的锁则应该处于解锁(未加锁状态)
+
+~~~
+
+### 锁申请等待限时
+
+可以使用 tryLock()或者tryLock(long timeout, TimeUtil unit) 方法进行一次限时的锁等待。
+
+在指定时长内获取到锁则继续执行，如果等待指定时长后还没有获取到锁则返回false
+
+~~~java
+public void run() {
+        try {
+            if (lock.tryLock(1, TimeUnit.SECONDS)) { // 等待1秒
+                Thread.sleep(2000);  //休眠2秒
+            } else {
+                System.err.println(Thread.currentThread().getName() + "获取锁失败！");
+            }
+        } catch (Exception e) {
+            if (lock.isHeldByCurrentThread()) lock.unlock();
+        }
+    }
+
+~~~
+
+### 公平锁
+
+所谓公平锁，就是按照时间先后顺序，使先等待的线程先得到锁，而且，公平锁不会产生饥饿锁，也就是只要排队等待，最终能等待到获取锁的机会。使用重入锁（默认是非公平锁）创建公平锁：（我们默认使用的就不公平锁）
+
+~~~java
+public ReentrantLock(boolean fair) {
+    sync = fair ? new FairSync() : new NonfairSync();
+}
+~~~
+
+
+
+## 2.condition 
 
 3.semaphore
 
