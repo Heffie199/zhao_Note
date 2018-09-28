@@ -314,6 +314,84 @@ public class KillDeadlock implements Runnable{
 2： 这里需要注意的事，重入锁可以加多次锁是有条件的。
 重入锁ReentrantLock，顾名思义，就是支持重进入的锁，它表示该锁能够支持一个线程对资源的重复加锁。
 一个线程中能对同一把锁加多次，但是如果要加其他的锁，则其他的锁则应该处于解锁(未加锁状态)
+------------------------------------------------------------------------
+    
+    源码解释：
+       final void lock() {
+            if (compareAndSetState(0, 1)) //初始加锁，锁的状态是0，加了锁之后修改为1
+                setExclusiveOwnerThread(Thread.currentThread()); //取锁成功，当前线程加锁， setExclusiveOwnerThread 排他独有的线程，多个线程竞争，只有一个线程能竞争到锁。
+            else
+                acquire(1); //锁已经被占用，取锁失败，请求标志加一
+        }
+----
+    public final void acquire(int arg) {
+        if (!tryAcquire(arg) &&
+            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+            selfInterrupt();
+    }
+// tryAcquire(arg) 再去试着请求一次锁，万一锁被释放了，就加锁，不执行后面的代码
+   protected final boolean tryAcquire(int acquires) {
+            return nonfairTryAcquire(acquires);
+        }
+      final boolean nonfairTryAcquire(int acquires) { // acquires=1
+            final Thread current = Thread.currentThread();
+            int c = getState(); //获取加锁的状态
+            if (c == 0) { //c=0 ，锁的资源已经被释放
+                if (compareAndSetState(0, acquires)) { //重新尝试加锁，如果成功就返回
+                    setExclusiveOwnerThread(current); 
+                    return true;
+                }
+            }
+            else if (current == getExclusiveOwnerThread()) { 
+            //锁未被释放就去判断一下被锁的线程是否是当前线程，如果是同一个线程将申请标志加1，这个标志随着重入次数而递增，在解锁的时候回不短的递减，直至解锁为0后才能完全释放完锁。这里也解释了上面的问题重入锁限制的问题。
+                int nextc = c + acquires;
+                if (nextc < 0) // overflow
+                    throw new Error("Maximum lock count exceeded");
+                setState(nextc);
+                return true;
+            }
+            return false; //如果不是当前线程且未获取到锁则返回false
+        }
+//addWaiter(Node.EXCLUSIVE)： 此处Node.EXCLUSIVE是null,      
+    private Node addWaiter(Node mode) {
+        Node node = new Node(Thread.currentThread(), mode);
+        // Try the fast path of enq; backup to full enq on failure
+        Node pred = tail;
+        if (pred != null) {
+            node.prev = pred;
+            if (compareAndSetTail(pred, node)) {
+                pred.next = node;
+                return node;
+            }
+        }
+        enq(node);
+        return node; 
+    }//将当前线程构建成一个双向链表的节点并返回
+  //acquireQueued(addWaiter(Node.EXCLUSIVE), arg) ==acquireQueued(Node, 1) 
+  //acquireQueued 请求排队方法
+      final boolean acquireQueued(final Node node, int arg) {
+        boolean failed = true;
+        try {
+            boolean interrupted = false;
+            for (;;) {
+                final Node p = node.predecessor();
+                if (p == head && tryAcquire(arg)) { 
+  //当前节点是head节点的next节点且尝试请求加锁成功，则释放当前节点
+                    setHead(node);
+                    p.next = null; // help GC
+                    failed = false;
+                    return interrupted;
+                }
+                if (shouldParkAfterFailedAcquire(p, node) &&
+                    parkAndCheckInterrupt())
+                    interrupted = true;
+            }
+        } finally {
+            if (failed)
+                cancelAcquire(node);
+        }
+    }
+//此处是做Node节点线程的自旋过程，自旋过程主要检查当前节点是不是head节点的next节点，如果是，则尝试获取锁，如果获取成功，那么释放当前节点，同时返回。  cancelAcquire(node) 和 selfInterrupt();
 
 ~~~
 
@@ -352,7 +430,233 @@ public ReentrantLock(boolean fair) {
 
 ## 2.condition 
 
-3.semaphore
+condition 等价于synchronized关键字中使用的Object的wait()和notify方法。
+
+Condition是一个接口，它主要是由awiat和singal方法组成，awiat方法是放弃自身锁，进入阻塞状态，等待信号进行唤醒，singal是唤醒线程，让线程去重新竞争锁。它和Object的wait和notify方法是一样的。
+
+~~~java
+        //   头节点 
+        private transient Node firstWaiter;
+        //   尾节点
+        private transient Node lastWaiter;
+Condition内部维护了一个由Node节点组成的单向链表，包括头节点和尾节点，这个链表的作用是存放等待signal信号的线程，线程被封装为Node节点。
+
+~~~
+
+通常在开发并发程序的时候，会碰到需要停止正在执行业务A，来执行另一个业务B，当业务B执行完成后业务A继续执行。ReentrantLock通过Condtion等待/唤醒这样的机制.
+
+Condition 的await()方法： 他做两件事，将当前线程加入到等待队列，和完全地解开加在线程上的锁。并释放加锁的节点。线程放弃共享资源的所有权(且线程暂时不挣抢资源)，进入等待	
+
+~~~java
+       public final void await() throws InterruptedException {
+            if (Thread.interrupted())
+                throw new InterruptedException();
+            Node node = addConditionWaiter(); //将当前线程封装为线程等待单链表的尾节点
+            int savedState = fullyRelease(node); //完全的释放当前线程占有的锁
+            int interruptMode = 0;
+            while (!isOnSyncQueue(node)) { //判断当前现车是否是在可以挣抢资源的同步队列中
+                LockSupport.park(this); //挂起当前线程
+                if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+                    break;
+            }
+            if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
+                interruptMode = REINTERRUPT;
+            if (node.nextWaiter != null) // clean up if cancelled
+                unlinkCancelledWaiters();
+            if (interruptMode != 0)
+                reportInterruptAfterWait(interruptMode);
+        }
+~~~
+
+
+
+相比较synchronize的wait()和notify()/notifAll()的机制而言，Condition具有更高的灵活性，这个很关键。Conditon可以实现多路通知和选择性通知。当使用notify()/notifAll()时，JVM时随机通知线程的，具有很大的不可控性，所以建议使用Condition。Condition使用起来也非常方便，只需要注册到ReentrantLock下面即可。
+
+~~~java
+public class MyService {
+
+    // 实例化一个ReentrantLock对象
+    private ReentrantLock lock = new ReentrantLock();
+    // 为线程A注册一个Condition
+    public Condition conditionA = lock.newCondition();
+    // 为线程B注册一个Condition
+    public Condition conditionB = lock.newCondition();
+
+    public void awaitA() {
+        try {
+            lock.lock();
+            System.out.println(Thread.currentThread().getName() + "进入了awaitA方法");
+            long timeBefore = System.currentTimeMillis();
+            // 执行conditionA等待
+            conditionA.await();
+            long timeAfter = System.currentTimeMillis();
+            System.out.println(Thread.currentThread().getName()+"被唤醒");
+            System.out.println(Thread.currentThread().getName() + "等待了: " + (timeAfter - timeBefore)/1000+"s");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void awaitB() {
+        try {
+            lock.lock();
+            System.out.println(Thread.currentThread().getName() + "进入了awaitB方法");
+            long timeBefore = System.currentTimeMillis();
+            // 执行conditionB等待
+            conditionB.await();
+            long timeAfter = System.currentTimeMillis();
+            System.out.println(Thread.currentThread().getName()+"被唤醒");
+            System.out.println(Thread.currentThread().getName() + "等待了: " + (timeAfter - timeBefore)/1000+"s");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void signallA() {
+        try {
+            lock.lock();
+            System.out.println("启动唤醒程序");
+            // 唤醒所有注册conditionA的线程
+            conditionA.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    public void signallB() {
+        try {
+            lock.lock();
+            System.out.println("启动唤醒程序");
+            // 唤醒所有注册conditionA的线程
+            conditionB.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+
+================================================
+ 注意：
+ 分别实例化了两个Condition对象，都是使用同一个lock注册。注意conditionA对象的等待和唤醒只对使用了conditionA的线程有用，同理conditionB对象的等待和唤醒只对使用了conditionB的线程有用。
+~~~
+
+
+
+### 3.semaphore (信号量)
+
+Semaphore管理一系列许可证。每个acquire方法阻塞，直到有一个许可证可以获得然后拿走一个许可证；每个release方法增加一个许可证，这可能会释放一个阻塞的acquire方法。然而，其实并没有实际的许可证这个对象，Semaphore只是维持了一个可获得许可证的数量。 
+
+Semaphore经常用于限制获取某种资源的线程数量。下面举个例子，比如说操场上有5个跑道，一个跑道一次只能有一个学生在上面跑步，一旦所有跑道在使用，那么后面的学生就需要等待，直到有一个学生不跑了。
+
+~~~java
+使用实例：
+class SDTask extends Thread
+{
+	private Semaphore s;
+	public SDTask(Semaphore s,String name)
+	{
+		super(name);
+		this.s = s;
+	}
+	public void run()
+	{
+		try
+		{
+			System.out.println(Thread.currentThread().getName()+" 尝试获取3个信号!!!");
+			s.acquire(3);
+			System.out.println(Thread.currentThread().getName()+" 获取了3个信号!!!");
+			TimeUnit.SECONDS.sleep(2);
+		} catch (InterruptedException e)
+		{
+			e.printStackTrace();
+		}finally
+		{
+			System.out.println(Thread.currentThread().getName()+" 释放了3个信号!!!");
+			s.release(3);
+		}
+	}
+}
+public class SemaphoreDemo2
+{
+	public static void main(String[] args)
+	{
+		Semaphore s = new Semaphore(7);
+		for(int i=0; i<3; i++)
+		{
+			new SDTask(s,"thread"+i).start();;
+		}
+	}
+}
+
+~~~
+
+
+
+Semaphore是一个计数信号量，采用的是共享锁的方式来控制
+
+acquire(int)来获取信号量,直到只有一个可以用或者出现中断。
+
+release(int)用来释放信号量，将信号量数量返回给Semaphore
+
+~~~java
+    public void acquire(int permits) throws InterruptedException {
+        if (permits < 0) throw new IllegalArgumentException();
+        sync.acquireSharedInterruptibly(permits);
+    }
+==================
+   public final void acquireSharedInterruptibly(int arg)
+            throws InterruptedException {
+        if (Thread.interrupted())
+            throw new InterruptedException();
+        if (tryAcquireShared(arg) < 0)
+            doAcquireSharedInterruptibly(arg);
+    }
+==============
+    tryAcquireShared实际调用nonfairTryAcquireShared方法
+       final int nonfairTryAcquireShared(int acquires) {
+            for (;;) {
+                int available = getState(); //getState 这里的state是信号量的数量
+                int remaining = available - acquires;
+                if (remaining < 0 ||
+                    compareAndSetState(available, remaining))
+                    return remaining;
+            }
+        }
+  ===========
+    private void doAcquireSharedInterruptibly(int arg)
+        throws InterruptedException {
+        final Node node = addWaiter(Node.SHARED);
+        boolean failed = true;
+        try {
+            for (;;) {
+                final Node p = node.predecessor();
+                if (p == head) {
+                    int r = tryAcquireShared(arg);
+                    if (r >= 0) {
+                        setHeadAndPropagate(node, r);
+                        p.next = null; // help GC
+                        failed = false;
+                        return;
+                    }
+                }
+                if (shouldParkAfterFailedAcquire(p, node) &&
+                    parkAndCheckInterrupt())
+                    throw new InterruptedException();
+            }
+        } finally {
+            if (failed)
+                cancelAcquire(node);
+        }
+    }
+====================
+  
+~~~
+
+
 
 4.ReadWriteLock
 
