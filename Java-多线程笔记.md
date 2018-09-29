@@ -232,6 +232,87 @@ CAS的原理
 
 都是synchronized关键字的升级版
 
+## AQS(AbstractQueuedSynchronizer)
+
+AQS）作为java.util.concurrent包的基础，它提供了一套完整的同步编程框架，开发人员只需要实现其中几个简单的方法就能自由的使用诸如独占，共享，条件队列等多种同步模式。我们常用的比如ReentrantLock，CountDownLatch等等基础类库都是基于AQS实现的
+
+### 深入浅出AQS之独占锁模式
+
+AQS独占锁的执行逻辑:
+
+获取锁的过程：
+
+1. 当线程调用acquire()申请获取锁资源，如果成功，则进入临界区。
+2. 当获取锁失败时，则进入一个FIFO等待队列，然后被挂起等待唤醒。
+3. 当队列中的等待线程被唤醒以后就重新尝试获取锁资源，如果成功则进入临界区，否则继续挂起等待。
+
+释放锁过程：
+
+1. 当线程调用release()进行锁资源释放时，如果没有其他线程在等待锁资源，则释放完成。
+2. 如果队列中有其他等待锁资源的线程需要唤醒，则唤醒队列中的第一个等待节点（先入先出）
+
+~~~java
+   public final void acquire(int arg) {
+        if (!tryAcquire(arg) &&
+            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+            selfInterrupt();
+    }
+首先是调用开发人员自己实现的tryAcquire() 方法尝试获取锁资源，如果成功则整个acquire()方法执行完毕，即当前线程获得锁资源，可以进入临界区。
+如果获取锁失败，则开始进入后面的逻辑，加入等待队列
+
+~~~
+
+首先是addWaiter(Node.EXCLUSIVE)方法 : 这里是独占锁模式，所以节点模式为Node.EXCLUSIVE
+
+~~~java
+//注意：该入队方法的返回值就是新创建的节点
+    private Node addWaiter(Node mode) {
+        //基于当前线程，节点类型（Node.EXCLUSIVE）创建新的节点
+        //由于这里是独占模式，因此节点类型就是Node.EXCLUSIVE
+        Node node = new Node(Thread.currentThread(), mode);
+        Node pred = tail;
+        //这里为了提搞性能，首先执行一次快速入队操作，即直接尝试将新节点加入队尾
+        if (pred != null) {
+            node.prev = pred;
+            //这里根据CAS的逻辑，即使并发操作也只能有一个线程成功并返回，其余的都要执行后面的入队操作。即enq()方法
+            if (compareAndSetTail(pred, node)) {
+                pred.next = node;
+                return node;
+            }
+        }
+        enq(node);
+        return node;
+    }
+
+    //完整的入队操作
+    private Node enq(final Node node) {
+        for (;;) {
+            Node t = tail; // tail 尾节点， t就是尾节点
+            //如果队列还没有初始化，则进行初始化，即创建一个空的头节点
+            if (t == null) {  
+                //同样是CAS，只有一个线程可以初始化“头结点”成功，其余的都要重复执行循环体
+                if (compareAndSetHead(new Node())) 
+                    tail = head; //初始化的时候头结点和尾节点指向同一个节点
+            } else {
+                //新创建的节点指向队列尾节点，毫无疑问并发情况下这里会有多个新创建的节点指向队列尾节点
+                node.prev = t; //简单来说就是将新节点放在原来链表的尾节点后
+                //基于这一步的CAS，不管前一步有多少新节点都指向了尾节点，这一步只有一个能真正入队成功，其他的都必须重新执行循环体
+                if (compareAndSetTail(t, node)) { //将尾指针指向新节点
+                    t.next = node; 
+                    //该循环体唯一退出的操作，就是入队成功（否则就要无限重试）
+                    return t;
+                }
+            }
+        }
+    }
+~~~
+
+
+
+### 深入浅出AQS之共享锁模式
+
+### 深入浅出AQS之条件队列
+
 ## 1.ReentrantLock
 
 ReentrantLock（重入锁）是synchronized的升级版，但是两者在性能上并无太大的差异，只是ReentantLock具有更完善的功能：可中断响应、锁申请等待限时、公平锁等。 如果并发量较少就不是一定需要使用ReentrantLock。
@@ -546,7 +627,7 @@ public class MyService {
 
 
 
-### 3.semaphore (信号量)
+## 3.semaphore (信号量)
 
 Semaphore管理一系列许可证。每个acquire方法阻塞，直到有一个许可证可以获得然后拿走一个许可证；每个release方法增加一个许可证，这可能会释放一个阻塞的acquire方法。然而，其实并没有实际的许可证这个对象，Semaphore只是维持了一个可获得许可证的数量。 
 
