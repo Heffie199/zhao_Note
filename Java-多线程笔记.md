@@ -307,7 +307,17 @@ AQS独占锁的执行逻辑:
     }
 ~~~
 
+https://blog.csdn.net/chen77716/article/details/6641477
 
+SIGNAL(-1) ：线程的后继线程正/已被阻塞，当该线程release或cancel时要重新这个后继线程(unpark)
+
+CANCELLED(1)：因为超时或中断，该线程已经被取消
+
+CONDITION(-2)：表明该线程被处于条件队列，就是因为调用了Condition.await而被阻塞
+
+PROPAGATE(-3)：传播共享锁
+
+0：0代表无状态
 
 ### 深入浅出AQS之共享锁模式
 
