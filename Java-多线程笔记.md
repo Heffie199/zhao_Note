@@ -264,6 +264,20 @@ AQS独占锁的执行逻辑:
 
 首先是addWaiter(Node.EXCLUSIVE)方法 : 这里是独占锁模式，所以节点模式为Node.EXCLUSIVE
 
+线程要包装为Node对象的主要原因，除了用Node构造供虚拟队列外，还用Node包装了各种线程状态
+
+SIGNAL(-1) ：线程的后继线程正/已被阻塞，当该线程release或cancel时要重新这个后继线程(unpark)
+
+CANCELLED(1)：因为超时或中断，该线程已经被取消
+
+CONDITION(-2)：表明该线程被处于条件队列，就是因为调用了Condition.await而被阻塞
+
+PROPAGATE(-3)：传播共享锁
+
+0：0代表无状态
+
+(https://blog.csdn.net/chen77716/article/details/6641477)
+
 ~~~java
 //注意：该入队方法的返回值就是新创建的节点
     private Node addWaiter(Node mode) {
@@ -297,29 +311,193 @@ AQS独占锁的执行逻辑:
                 //新创建的节点指向队列尾节点，毫无疑问并发情况下这里会有多个新创建的节点指向队列尾节点
                 node.prev = t; //简单来说就是将新节点放在原来链表的尾节点后
                 //基于这一步的CAS，不管前一步有多少新节点都指向了尾节点，这一步只有一个能真正入队成功，其他的都必须重新执行循环体
-                if (compareAndSetTail(t, node)) { //将尾指针指向新节点
-                    t.next = node; 
+                if (compareAndSetTail(t, node)) { 
+                  //这里只是将尾指针指向新节点，将新节点变成尾节点并没有修改t指向的值。t只是作为一个比较值
+                    t.next = node;  
                     //该循环体唯一退出的操作，就是入队成功（否则就要无限重试）
                     return t;
                 }
             }
         }
     }
+========================================================================
+一： 初始化队列的触发条件就是当前已经有线程占有了锁资源，因此上面创建的空的头节点可以认为就是当前占有锁资源的节点（虽然它并没有设置任何属性）。
+二： 注意整个代码是处在一个死循环中，知道入队成功。如果失败了就会不断进行重试。 
+三： 代码中使用无线循环的原因, 因为这是无锁的，在高并发的情况下，可能存在多个线程同时执行这个方法，但是无锁CAS只会允许一个线程执行成功，所以使用了无线循环让其他线程的任务在下次循环过程中能被执行成功，如果执行成功就会退出循环。
 ~~~
 
-https://blog.csdn.net/chen77716/article/details/6641477
 
-SIGNAL(-1) ：线程的后继线程正/已被阻塞，当该线程release或cancel时要重新这个后继线程(unpark)
 
-CANCELLED(1)：因为超时或中断，该线程已经被取消
+经过上面的操作，我们申请获取锁的线程已经成功加入了等待队列，那么节点接下来就要被挂起，等待被唤醒
 
-CONDITION(-2)：表明该线程被处于条件队列，就是因为调用了Condition.await而被阻塞
+（这里挂起就是线程被中断     Thread.currentThread().interrupt(); ）
 
-PROPAGATE(-3)：传播共享锁
+~~~java
+final boolean acquireQueued(final Node node, int arg) { //node就是刚入队的包含当前线程信息的节点
+        //锁资源获取失败标记位
+        boolean failed = true;
+        try {
+            //等待线程被中断标记位
+            boolean interrupted = false;
+            //这个循环体执行的时机包括新节点入队和队列中等待节点被唤醒两个地方
+            for (;;) {
+                //获取当前节点的前置节点
+                final Node p = node.predecessor();
+                //如果前置节点就是头结点，则尝试获取锁资源
+                if (p == head && tryAcquire(arg)) {
+                    //当前节点获得锁资源以后设置为头节点，这里继续理解我上面说的那句话
+                    //头结点就表示当前正占有锁资源的节点
+                    setHead(node);
+                    p.next = null; //帮助GC
+                    //表示锁资源成功获取，因此把failed置为false
+                    failed = false;
+                    //返回中断标记，表示当前节点是被正常唤醒还是被中断唤醒
+                    return interrupted;
+                }
+                如果没有获取锁成功，则进入挂起逻辑
+                if (shouldParkAfterFailedAcquire(p, node) && //先判断线程获取锁失败后是否应该被挂起
+                    parkAndCheckInterrupt()) //如果应该被挂起就执行挂起逻辑并检查中断
+                    interrupted = true;
+            }
+        } finally {
+            //最后会分析获取锁失败处理逻辑
+            if (failed)
+                cancelAcquire(node);
+        }
+    }
+~~~
 
-0：0代表无状态
+~~~java
+//这个方法就是判断该线程是否应该被挂起
+private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {//node是当前线程的节点，pred是它的前置节点
+        //获取前置节点的waitStatus
+        int ws = pred.waitStatus;
+        if (ws == Node.SIGNAL)
+       //如果前置节点的waitStatus是Node.SIGNAL则返回true，然后会执行parkAndCheckInterrupt()方法进行挂起
+       //这里有点难以理解，但是线程在定义节点--- SIGNAL(-1) ：线程的后继线程正/已被阻塞(下一个线程需要被挂起)
+            return true;
+        if (ws > 0) {
+            //由waitStatus的几个取值可以判断这里表示前置节点被取消
+            do {
+                node.prev = pred = pred.prev;
+            } while (pred.waitStatus > 0);
+            //这里我们由当前节点的前置节点开始，一直向前找最近的一个没有被取消的节点
+            //注，由于头结点head是通过new Node()创建，它的waitStatus为0,因此这里不会出现空指针问题，也就是说最多就是找到头节点上面的循环就退出了
+            pred.next = node;
+        } else {
+            //根据waitStatus的取值限定，这里pre的waitStatus的值只能是0或者PROPAGATE(共享锁模式)，那么我们把前置节点的waitStatus设为Node.SIGNAL然后重新进入该方法进行判断
+            compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
+        }
+        return false;
+    }
+
+---------------------------------------------------
+    private final boolean parkAndCheckInterrupt() {
+        LockSupport.park(this); //挂起
+        return Thread.interrupted();
+    }
+
+~~~
+
+释放锁的过程：
+
+~~~javascript
+public final boolean release(int arg) {
+        if (tryRelease(arg)) {
+            Node h = head;
+            if (h != null && h.waitStatus != 0)
+                unparkSuccessor(h);
+            return true;
+        }
+        return false;
+    }
+tryRelease()方法是用户自定义的释放锁逻辑
+如果成功，就判断等待队列中有没有需要被唤醒的节点（waitStatus为0表示没有需要被唤醒的节点,0是无效节点）
+---------------------
+private void unparkSuccessor(Node node) { //此处的节点是头结点， 头结点是获取了锁的节点，他的下一个节点是等待中的节点，也就是需要被唤醒的节点
+        int ws = node.waitStatus;
+        if (ws < 0)
+            //把标记为设置为0，表示唤醒操作已经开始进行，提高并发环境下性能
+            compareAndSetWaitStatus(node, ws, 0);
+
+        Node s = node.next;
+        //如果当前节点的后继节点为null，或者已经被取消
+        if (s == null || s.waitStatus > 0) {
+            s = null;  //这里s可能不为null，只是一个废弃节点
+            //注意这个循环没有break，也就是说它是从后往前找，一直找到离当前节点最近的一个等待唤醒的节点
+            for (Node t = tail; t != null && t != node; t = t.prev)
+                if (t.waitStatus <= 0)
+                    s = t;
+        }
+        //执行唤醒操作
+        if (s != null)
+            LockSupport.unpark(s.thread);
+    }
+
+
+~~~
 
 ### 深入浅出AQS之共享锁模式
+
+**执行过程**
+
+获取锁的过程：
+
+1. 当线程调用acquireShared()申请获取锁资源时，如果成功，则进入临界区。
+2. 当获取锁失败时，则创建一个共享类型的节点并进入一个FIFO等待队列，然后被挂起等待唤醒。
+3. 当队列中的等待线程被唤醒以后就重新尝试获取锁资源，如果成功则**唤醒后面还在等待的共享节点并把该唤醒事件传递下去，即会依次唤醒在该节点后面的所有共享节点**，然后进入临界区，否则继续挂起等待。
+
+释放锁过程：
+
+1. 当线程调用releaseShared()进行锁资源释放时，如果释放成功，则唤醒队列中等待的节点，如果有的话。
+
+~~~java
+获取共享锁的方法acquireShared()
+public final void acquireShared(int arg) {
+        //尝试获取共享锁，返回值小于0表示获取失败
+        if (tryAcquireShared(arg) < 0)
+            //执行获取锁失败以后的方法
+            doAcquireShared(arg);
+ }
+
+----------------------------------------------------
+    private void doAcquireShared(int arg) { //获取锁失败后挂起
+        //添加等待节点的方法跟独占锁一样，唯一区别就是节点类型变为了共享型，不再赘述
+        final Node node = addWaiter(Node.SHARED);
+        boolean failed = true;
+        try {
+            boolean interrupted = false;
+            for (;;) {
+                final Node p = node.predecessor();
+                //表示前面的节点已经获取到锁，自己会尝试获取锁
+                if (p == head) {
+                    int r = tryAcquireShared(arg);
+                    //注意上面说的， 等于0表示不用唤醒后继节点，大于0，获取锁成功，唤醒后继节点
+                    if (r >= 0) {
+                        //这里是重点，获取到锁以后的唤醒操作，后面详细说
+                        setHeadAndPropagate(node, r);
+                        p.next = null;
+                        //如果是因为中断醒来则设置中断标记位
+                        if (interrupted)
+                            selfInterrupt();
+                        failed = false;
+                        return;
+                    }
+                }
+                //挂起逻辑跟独占锁一样，不再赘述
+                if (shouldParkAfterFailedAcquire(p, node) &&
+                    parkAndCheckInterrupt())
+                    interrupted = true;
+            }
+        } finally {
+            //获取失败的取消逻辑跟独占锁一样，不再赘述
+            if (failed)
+                cancelAcquire(node);
+        }
+    }
+~~~
+
+
 
 ### 深入浅出AQS之条件队列
 
@@ -747,19 +925,201 @@ release(int)用来释放信号量，将信号量数量返回给Semaphore
   
 ~~~
 
+## 4.LockSupport 
+
+LockSupport 和 CAS 是Java并发包中很多并发工具控制机制的基础，它们底层其实都是依赖Unsafe实现
+
+LockSupport是用来创建锁和其他同步类的基本**线程阻塞**  "原语"。
+
+LockSupport的pack挂起线程，unpack唤醒被挂起的线程
+
+pack时
+
+如果线程的permit（信号量是1） 存在，那么线程不会被挂起，立即返回；如果线程的permit(信号量是1)不存在，认为线程缺少permit，所以需要挂起等待permit。
+
+ unpack时
+
+如果线程的permit不存在，那么释放一个permit。因为有permit了，所以如果线程处于挂起状态，那么此线程会被线程调度器唤醒。如果线程的permit存在，permit也不会累加，看起来想什么事都没做一样。注意这一点和Semaphore是不同的。
+
+ LockSupport 很类似于二元信号量(只有1个许可证可供使用， 信号量(0,1),默认是0.)，如果这个许可还没有被占用，当前线程获取许可并继 续 执行；如果许可已经被占用，当前线 程阻塞，等待获取许可。
+
+~~~java
+LockSupport.park();
+运行该代码，可以发现线程一直处于阻塞状态。因为 许可默认是被占用的，信号量默认是0 ，调用park()时获取不到许可，所以进入阻塞状态。
+------------------
+Thread thread = Thread.currentThread();
+     LockSupport.unpark(thread);//释放许可，这里信号量+1 变成1.
+     LockSupport.park();// 获取许可，这时信号量是1，所以线程能正常运行，不会阻塞。他会消耗掉一个信号量，这个方法执行后信号量会变成0，所以Locksupport是不支持重入的
+     System.out.println("b");
+这里主线程是能够正常的运行的
+
+--------------------
+public static void t2() throws Exception
+{
+	Thread t = new Thread(new Runnable()
+	{
+		public void run()
+		{
+			.................
+		//等待或许许可
+			LockSupport.park();
+		    System.out.println("thread over." + ......);
+		}
+	});
+	t.start();
+	Thread.sleep(2000);
+	// 中断线程
+	t.interrupt();
+	System.out.println("main over");
+}
+
+---------------------
+最终线程会打印出thread over.true。这说明 线程如果因为调用park而阻塞的话，能够响应中断请求(中断状态被设置成true)，但是不会抛出InterruptedException 。
+~~~
 
 
-4.ReadWriteLock
 
-5.CountDownLatch(倒数计时器)
+**源码分析**
 
-6.CyclicBarrier（循环栅栏）
+park主要功能：
 
-7.LockSupport 
+如果许可存在，那么将这个许可使”用掉“，并且立即返回。如果许可不存在，那么挂起当前线程，直到以下任意一件事情发生：
+
+~~~java
+public static void park(Object blocker) {
+        //获取当前线程
+        Thread t = Thread.currentThread();
+        //设置线程的blocker对象
+        setBlocker(t, blocker);
+        //通过UNSAFE调用，挂起线程
+        UNSAFE.park(false, 0L);  // park（） 无参park也是调用的这句代码
+        //挂起的线程被唤醒以后，需要将阻塞的Blocker清理掉。
+        setBlocker(t, null);
+    }
+~~~
+
+
+
+## 5.ReadWriteLock(读写锁)
+
+ReadWriteLock管理一组锁，一个是只读的锁，一个是写锁。读锁可以在没有写锁的时候被多个线程同时持有，写锁是独占的。 
+
+一个获得了读锁的线程必须能看到前一个释放的写锁所更新的内容。 
+
+读写锁比互斥锁允许对于共享数据更大程度的并发。每次只能有一个写线程，但是同时可以有多个线程并发地读数据。ReadWriteLock适用于读多写少的并发情况。 
+
+~~~java
+public class ReadAndWriteLock {
+	ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	public void get(Thread thread) {
+		lock.readLock().lock();
+		try{
+			System.out.println("start time:"+System.currentTimeMillis());
+			for(int i=0; i<5; i++){
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				System.out.println(thread.getName() + ":正在进行读操作……");
+			}
+			System.out.println(thread.getName() + ":读操作完毕！");
+			System.out.println("end time:"+System.currentTimeMillis());
+		}finally{
+			lock.readLock().unlock();
+		}
+	}
+	
+	public static void main(String[] args) {
+        //开启线程
+	}
+}
+=============================
+    验证下读写锁的互斥关系
+    public class ReadAndWriteLock {
+   ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	public static void main(String[] args) {
+		final ReadAndWriteLock lock = new ReadAndWriteLock();
+         // 建N个线程，同时读
+		ExecutorService service = Executors.newCachedThreadPool();
+		service.execute(new Runnable() {
+			@Override
+			public void run() {
+				lock.readFile(Thread.currentThread());
+			}
+		});
+		// 建N个线程，同时写
+		ExecutorService service1 = Executors.newCachedThreadPool();
+		service1.execute(new Runnable() {
+			@Override
+			public void run() {
+				lock.writeFile(Thread.currentThread());
+			}
+		});
+	}
+	// 读操作
+	public void readFile(Thread thread){
+		lock.readLock().lock();
+		boolean readLock = lock.isWriteLocked();
+		if(!readLock){
+			System.out.println("当前为读锁！");
+		}
+		try{
+			for(int i=0; i<5; i++){
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				System.out.println(thread.getName() + ":正在进行读操作……");
+			}
+			System.out.println(thread.getName() + ":读操作完毕！");
+		}finally{
+         System.out.println("释放读锁！");
+			lock.readLock().unlock();
+		}
+	}
+	// 写操作
+	public void writeFile(Thread thread){
+		lock.writeLock().lock();
+		boolean writeLock = lock.isWriteLocked();
+		if(writeLock){
+			System.out.println("当前为写锁！");
+		}
+		try{
+			for(int i=0; i<5; i++){
+				try {
+					Thread.sleep(20);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				System.out.println(thread.getName() + ":正在进行写操作……");
+			}
+			System.out.println(thread.getName() + ":写操作完毕！");
+		}finally{
+         System.out.println("释放写锁！");
+			lock.writeLock().unlock();
+		}
+	}
+}
+
+~~~
+
+
+
+## 6.CountDownLatch(倒数计时器)
+
+CountDownLatch是一个同步工具类，协调多个线程之间的同步，或者说起到线程之间的通信。
+
+CountDownLatch能够使一个线程在等待另外一些线程完成各自工作之后，再继续执行。（ReentrantLock +Condition 也可以做到）
 
 
 
 
+
+## 7.CyclicBarrier（循环栅栏）
+
+## 
 
 
 
