@@ -329,7 +329,36 @@ static final class Node {
     }
 ~~~
 
+![img](https://images2018.cnblogs.com/blog/1400011/201805/1400011-20180513211820725-389872507.png)
 
+AbstractQueuedSynchronizer的三个重要属性
+
+~~~java
+  //等待队列的头结点
+    private transient volatile Node head;
+    //等待队列的尾节点
+    private transient volatile Node tail;
+    //同步状态，这个很重要
+    private volatile int state;
+~~~
+
+可以得到同步队列的基本结构：
+
+![img](https://images2018.cnblogs.com/blog/1400011/201805/1400011-20180513211830066-167429002.png)
+
+AbstractQueuedSynchronizer类中其它方法主要是用于插入节点、释放节点
+
+插入节点过程如下图所示：
+
+![img](https://images2018.cnblogs.com/blog/1400011/201805/1400011-20180513211836170-1249096077.png)
+
+释放头结点过程如下图所示：
+
+![img](https://images2018.cnblogs.com/blog/1400011/201805/1400011-20180513211842294-1124199004.png)
+
+
+
+fasdfasd
 
 ### 深入浅出AQS之独占锁模式
 
@@ -1232,15 +1261,29 @@ CountDownLatch能够使一个线程在等待另外一些线程完成各自工作
 
 # 8 线程池
 
+线程的创建及销毁需要较大的代价，然而对于业务来说，它关心的只是线程所执行的任务，它希望把更多的cpu用在线程的任务上，而不是辅助性的线程的创建及销毁。 所以线程池应运而生，它主要的任务就是线程的复用，避免每执行一个线程都要开启和销毁一次线程。
+
+线程池创建的核心是要把所有的线程保留下来用以复用，而非一执行完之后就销毁线程
+
+## 基本线程池
+
+## 扩展和增强线程池
+
+## 线程池及其源码的分析
+
+## ForkJoin
 
 
-基本线程池
 
-扩展和增强线程池
+# 9 并行设计模式
 
-线程池及其源码的分析
+单例模式
 
-ForkJoin
+不变模式
+
+Future 模式
+
+生产者消费者模式
 
 
 
