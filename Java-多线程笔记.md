@@ -222,7 +222,6 @@ CAS的原理
 
    **CAS 的含义是“我认为原有的值应该是什么，如果是，则将原有的值更新为新值，否则不做修改，并告诉我原来的值是多少”**。
 
-2. sd
 
 **cas**
 
@@ -233,6 +232,8 @@ CAS的原理
 都是synchronized关键字的升级版
 
 ## java 线程的中断机制
+
+什么是中断？ 就是讲线程==从阻塞等待状态中唤醒==，并做出相应的响应处理。
 
 有时想让主线程启动的一个子线程结束运行，我们就需要让这个子线程中断，不再继续执行。线程是有中断机制的，我们可以对每个线程进行中断标记，注意只是标记，中断与否还是虚拟机自己的事情，虚拟机自己家的事情，我们也就说说，不能实际操作控制他家
 
@@ -249,7 +250,7 @@ CAS的原理
 |   **public boolean isInterrupted()**   | 判断线程是否已经中断，不对中断值做任何操作                   |
 |      public void **interrupt**()       | 中断线程， 将interrupted 设置为true                          |
 
-  
+ 线程调用了 Interrupt()并不会立即的就停止线程，它只是设置了线程的阻塞状态是true，当线程在调用阻塞方法的时候，阻塞方法轮询interrupted，检测是否中断，如果为true，就抛出InterruptedException。
 
 ### 中断的处理
 
@@ -265,13 +266,70 @@ CAS的原理
 
 由上面可以在抛出InterruptedException之前都是清除了中断标志了的。这是因为抛出InterruptedException就是已经对检测到中断标志做了一次处理了。已经处理过了一次，标志也就无效了。 如果需要再做一次处理就需要重新设置一次标志位。
 
+==这里抛出异常使为了让线程从阻塞的状态清醒过来，且抛出中断异常后中断标志就清除了==。
+
+设置标志位只是为引起中断线程的注意，被中断线程可以决定如何应对中断
 
 
 
+·
 
 ## AQS(AbstractQueuedSynchronizer)
 
 AQS）作为java.util.concurrent包的基础，它提供了一套完整的同步编程框架，开发人员只需要实现其中几个简单的方法就能自由的使用诸如独占，共享，条件队列等多种同步模式。我们常用的比如ReentrantLock，CountDownLatch等等基础类库都是基于AQS实现的
+
+AQS通过内部实现的FIFO等待队列来完成资源获取线程的等待工作，如果当前线程获取资源失败，AQS则会将当前线程以及等待状态等信息构造成一个Node结构的节点，并将其加入等待队列中，同时会阻塞当前线程；当其它获取到资源的线程释放持有的资源时，则会把等待队列节点中的线程唤醒，使其再次尝试获取对应资源。
+
+内部定义的Node**类的代码**
+
+~~~java
+static final class Node {
+        //声明共享模式下的等待节点
+        static final Node SHARED = new Node();
+        //声明独占模式下的等待节点
+        static final Node EXCLUSIVE = null;
+
+        //waitStatus的一常量值，表示线程已取消
+        static final int CANCELLED =  1;
+        //waitStatus的一常量值，表示后继线程需要取消挂起
+        static final int SIGNAL    = -1;
+        //waitStatus的一常量值，表示线程正在等待条件
+        static final int CONDITION = -2;
+        //waitStatus的一常量值，表示下一个acquireShared应无条件传播
+        static final int PROPAGATE = -3;
+
+        //waitStatus,其值只能为CANCELLED、SIGNAL、CONDITION、PROPAGATE或0
+        //初始值为0
+        volatile int waitStatus;
+
+        //前驱节点
+        volatile Node prev;
+
+        //后继节点
+        volatile Node next;
+
+        //当前节点的线程，在节点初始化时赋值，使用后为null
+        volatile Thread thread;
+
+        //下一个等待节点
+        Node nextWaiter;
+
+        Node() { 
+        }
+
+        Node(Thread thread, Node mode) {     // Used by addWaiter
+            this.nextWaiter = mode;
+            this.thread = thread;
+        }
+
+        Node(Thread thread, int waitStatus) { // Used by Condition
+            this.waitStatus = waitStatus;
+            this.thread = thread;
+        }
+    }
+~~~
+
+
 
 ### 深入浅出AQS之独占锁模式
 
@@ -1160,11 +1218,29 @@ CountDownLatch能够使一个线程在等待另外一些线程完成各自工作
 
 ## 
 
+# 7 并发容器
+
+## 1.集合包装
+
+## 2.ConcurrentHashMap
+
+## 3 BlockingQueue
+
+## 4 ConcurrentLinkQueue
 
 
 
+# 8 线程池
 
 
+
+基本线程池
+
+扩展和增强线程池
+
+线程池及其源码的分析
+
+ForkJoin
 
 
 
