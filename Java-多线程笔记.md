@@ -356,15 +356,19 @@ AbstractQueuedSynchronizer类中其它方法主要是用于插入节点、释放
 
 ![img](https://images2018.cnblogs.com/blog/1400011/201805/1400011-20180513211842294-1124199004.png)
 
+AQS的实现依赖的是由Node节点构建的内部先进先出的双向链表队列。
 
+**线程获取和释放锁的本质是去修改AQS内部代表同步变量的值 state  1 代表线程获取了锁 0带表线程未获取锁**
 
-fasdfasd
+AQS 中维护着两个队列，一个同步队列（获取锁失败暂时阻塞），一个等待队列(因为某些条件主动调用await()进行阻塞，必须要被主动唤醒)。
+
+### 
 
 ### 深入浅出AQS之独占锁模式
 
 AQS独占锁的执行逻辑:
 
-### 获取锁的过程：
+**获取锁的过程：**
 
 1. 当线程调用acquire()申请获取锁资源，如果成功，则进入临界区。
 2. 当获取锁失败时，则进入一个FIFO等待队列，然后被挂起等待唤醒。
@@ -823,7 +827,23 @@ public ReentrantLock(boolean fair) {
 
 ## 2.condition 
 
-condition 等价于synchronized关键字中使用的Object的wait()和notify方法。
+通常在开发并发程序的时候，会碰到需要停止正在执行业务A，来执行另一个业务B，当业务B执行完成后业务A继续执行。ReentrantLock通过Condtion等待/唤醒这样的机制.
+
+condition 等价于synchronized关键字中使用的Object的wait()和notify方法,它和ReentrantLock结合起来用于线程的等待和唤醒，但是它更加的灵活，与Object下的wait() 只能有一个等待队列不同，Condition可以实现由多个条件下的等待队列，condition顾名思义可知，在不同的条件下可以创建不同的等待队列，调用一次lock.newCondition()就为lock下生成一个等待队列。
+
+基本内容：
+
+1.Condition提供了await()方法将当前线程阻塞，并提供signal()方法支持另外一个线程将已经阻塞的线程唤醒。
+
+2.Condition需要结合Lock使用
+
+3 线程调用await()方法前必须获取锁，调用await()方法时，将线程构造成节点加入等待队列，同时释放锁，并挂起当前线程
+
+4 其他线程调用signal()方法前也必须获取锁，当执行signal()方法时将等待队列的节点移入到同步队列，当线程退出临界区释放锁的时候，唤醒同步队列的首个节点
+
+![img](https://upload-images.jianshu.io/upload_images/5507455-37635d0723174712.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/923/format/webp)
+
+
 
 Condition是一个接口，它主要是由awiat和singal方法组成，awiat方法是放弃自身锁，进入阻塞状态，等待信号进行唤醒，singal是唤醒线程，让线程去重新竞争锁。它和Object的wait和notify方法是一样的。
 
@@ -832,13 +852,10 @@ Condition是一个接口，它主要是由awiat和singal方法组成，awiat方�
         private transient Node firstWaiter;
         //   尾节点
         private transient Node lastWaiter;
-Condition内部维护了一个由Node节点组成的单向链表，包括头节点和尾节点，这个链表的作用是存放等待signal信号的线程，线程被封装为Node节点。
-
+Condition内部维护了一个由线程封装的Node节点组成的单向链表(等待队列)，这个链表的作用是存放等待signal信号的线程。
 ~~~
 
-通常在开发并发程序的时候，会碰到需要停止正在执行业务A，来执行另一个业务B，当业务B执行完成后业务A继续执行。ReentrantLock通过Condtion等待/唤醒这样的机制.
-
-Condition 的await()方法： 他做两件事，将当前线程加入到等待队列，和完全地解开加在线程上的锁。并释放加锁的节点。线程放弃共享资源的所有权(且线程暂时不挣抢资源)，进入等待	
+Condition 的await()方法： 他做两件事，将当前线程加入到等待队列，和完全地解开加在线程上的锁。线程放弃共享资源的所有权(且线程暂时不挣抢资源)，进入等待	
 
 ~~~java
        public final void await() throws InterruptedException {
