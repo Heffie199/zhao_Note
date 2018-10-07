@@ -864,7 +864,7 @@ Condition 的await()方法： 他做两件事，将当前线程加入到等待�
             Node node = addConditionWaiter(); //将当前线程封装为线程等待单链表的尾节点
             int savedState = fullyRelease(node); //完全的释放当前线程占有的锁
             int interruptMode = 0;
-            while (!isOnSyncQueue(node)) { //判断当前现车是否是在可以挣抢资源的同步队列中
+            while (!isOnSyncQueue(node)) { //判断当前线程是否是在可以挣抢资源的同步队列中
                 LockSupport.park(this); //挂起当前线程
                 if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
                     break;
@@ -877,8 +877,6 @@ Condition 的await()方法： 他做两件事，将当前线程加入到等待�
                 reportInterruptAfterWait(interruptMode);
         }
 ~~~
-
-
 
 相比较synchronize的wait()和notify()/notifAll()的机制而言，Condition具有更高的灵活性，这个很关键。Conditon可以实现多路通知和选择性通知。当使用notify()/notifAll()时，JVM时随机通知线程的，具有很大的不可控性，所以建议使用Condition。Condition使用起来也非常方便，只需要注册到ReentrantLock下面即可。
 
@@ -958,7 +956,18 @@ public class MyService {
 
 ## 3.semaphore (信号量)
 
-Semaphore管理一系列许可证。每个acquire方法阻塞，直到有一个许可证可以获得然后拿走一个许可证；每个release方法增加一个许可证，这可能会释放一个阻塞的acquire方法。然而，其实并没有实际的许可证这个对象，Semaphore只是维持了一个可获得许可证的数量。 
+Semaphore也叫信号量，在JDK1.5被引入，可以**用来控制同时访问特定资源的线程数量**，通过协调各个线程，以保证合理的使用资源。
+
+Semaphore内部维护了一组虚拟的许可，许可的数量可以通过构造函数的参数指定
+
+- 访问特定资源前，必须使用acquire方法获得许可，如果许可数量为0，该线程则一直阻塞，直到有可用许可。
+- 访问资源后，使用release释放许可。
+
+Semaphore管理一系列许可证。
+
+Semaphore和ReentrantLock类似，获取许可有公平策略和非公平许可策略，默认情况下使用非公平策略。
+
+每个acquire方法阻塞，直到有一个许可证可以获得然后拿走一个许可证；每个release方法增加一个许可证，这可能会释放一个阻塞的acquire方法。然而，其实并没有实际的许可证这个对象，Semaphore只是维持了一个可获得许可证的数量。 
 
 Semaphore经常用于限制获取某种资源的线程数量。下面举个例子，比如说操场上有5个跑道，一个跑道一次只能有一个学生在上面跑步，一旦所有跑道在使用，那么后面的学生就需要等待，直到有一个学生不跑了。
 
@@ -1065,6 +1074,42 @@ release(int)用来释放信号量，将信号量数量返回给Semaphore
 ====================
   
 ~~~
+
+### 应用场景
+
+1 Semaphore可以用来做流量分流，特别是对公共资源有限的场景，比如数据库连接。
+
+假设有这个的需求，读取几万个文件的数据到数据库中，由于文件读取是IO密集型任务，可以启动几十个线程并发读取，但是数据库连接数只有10个，这时就必须控制最多只有10个线程能够拿到数据库连接进行操作。这个时候，就可以使用Semaphore做流量控制。
+
+~~~java
+public class SemaphoreTest {
+    private static final int COUNT = 40;
+    private static Executor executor = Executors.newFixedThreadPool(COUNT);
+    private static Semaphore semaphore = new Semaphore(10);
+    public static void main(String[] args) {
+        for (int i=0; i< COUNT; i++) {
+            executor.execute(new ThreadTest.Task());
+        }
+    }
+
+    static class Task implements Runnable {
+        @Override
+        public void run() {
+            try {
+                //读取文件操作
+                semaphore.acquire();
+                // 存数据过程
+                semaphore.release();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+            }
+        }
+    }
+}
+~~~
+
+
 
 ## 4.LockSupport 
 
