@@ -1128,7 +1128,7 @@ public static void park(Object blocker) {
 
 ## 5.ReadWriteLock(读写锁)
 
-ReadWriteLock管理一组锁，一个是只读的锁，一个是写锁。读锁可以在没有写锁的时候被多个线程同时持有，写锁是独占的。 
+ReadWriteLock管理一组锁，一个是只读的锁，一个是写锁。读锁(共享锁)可以在没有写锁的时候被多个线程同时持有，写锁(独占锁)是独占的。 
 
 一个获得了读锁的线程必须能看到前一个释放的写锁所更新的内容。 
 
@@ -1142,11 +1142,7 @@ public class ReadAndWriteLock {
 		try{
 			System.out.println("start time:"+System.currentTimeMillis());
 			for(int i=0; i<5; i++){
-				try {
-					Thread.sleep(20);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+			  。。。。。。。。。。。
 				System.out.println(thread.getName() + ":正在进行读操作……");
 			}
 			System.out.println(thread.getName() + ":读操作完毕！");
@@ -1192,11 +1188,7 @@ public class ReadAndWriteLock {
 		}
 		try{
 			for(int i=0; i<5; i++){
-				try {
-					Thread.sleep(20);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+	。。。。。。。。。。。。。。。。。。。。。
 				System.out.println(thread.getName() + ":正在进行读操作……");
 			}
 			System.out.println(thread.getName() + ":读操作完毕！");
@@ -1214,11 +1206,7 @@ public class ReadAndWriteLock {
 		}
 		try{
 			for(int i=0; i<5; i++){
-				try {
-					Thread.sleep(20);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+		。。。。。。。。。。。。。。。。
 				System.out.println(thread.getName() + ":正在进行写操作……");
 			}
 			System.out.println(thread.getName() + ":写操作完毕！");
@@ -1235,13 +1223,37 @@ public class ReadAndWriteLock {
 
 ## 6.CountDownLatch(倒数计时器)
 
-CountDownLatch是一个同步工具类，协调多个线程之间的同步，或者说起到线程之间的通信。
+**CountDownLatch是什么？**
+
+CountDownLatch也叫闭锁，在JDK1.5被引入，允许一个或多个线程等待其他线程完成操作后再执行。CountDownLatch是一个同步工具类，协调多个线程之间的同步，或者说起到线程之间的通信。
 
 CountDownLatch能够使一个线程在等待另外一些线程完成各自工作之后，再继续执行。（ReentrantLock +Condition 也可以做到）
+
+CountDownLatch内部会维护一个初始值为线程数量的计数器，主线程执行await方法，如果计数器大于0，则阻塞等待。当一个线程完成任务后，计数器值减1。当计数器为0时，表示所有的线程已经完成任务，等待的主线程被唤醒继续执行。
+
+![img](https://upload-images.jianshu.io/upload_images/2184951-8a570622b8297310.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/353/format/webp)
 
 使用一个计数器进行实现。计数器初始值为线程的数量。当每一个线程完成自己任务后，计数器的值就会减一。当计数器的值为0时，表示所有的线程都已经完成了任务，然后在CountDownLatch上等待的线程就可以恢复执行任务。
 
 **CountDownLatch的用法**
+
+~~~java
+class Application {
+    private CountDownLatch latch;
+    public void startUp() throws Exception {
+        latch = new CountDownLatch(2); 
+        List<Service> services = new ArrayList<>();
+        services.add(new DatabaseCheckerService(latch)); //这里对应上图在服务线程中会进行latch.countDown(); 这样最后才能让latch为0唤醒主线程
+        services.add(new HealthCheckService(latch));
+        Executor executor = Executors.newFixedThreadPool(services.size());
+        for (Service service : services) {
+            executor.execute(service);
+        }
+        latch.await(); //这里对应着上图就是主线程阻塞。 
+        System.out.println("all service is start up");
+    }
+}
+~~~
 
 
 
