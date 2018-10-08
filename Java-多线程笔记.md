@@ -969,6 +969,8 @@ Semaphore和ReentrantLock类似，获取许可有公平策略和非公平许可�
 
 每个acquire方法阻塞，直到有一个许可证可以获得然后拿走一个许可证；每个release方法增加一个许可证，这可能会释放一个阻塞的acquire方法。然而，其实并没有实际的许可证这个对象，Semaphore只是维持了一个可获得许可证的数量。 
 
+### 应用场景 1
+
 Semaphore经常用于限制获取某种资源的线程数量。下面举个例子，比如说操场上有5个跑道，一个跑道一次只能有一个学生在上面跑步，一旦所有跑道在使用，那么后面的学生就需要等待，直到有一个学生不跑了。
 
 ~~~java
@@ -1013,69 +1015,11 @@ public class SemaphoreDemo2
 
 ~~~
 
-
-
 Semaphore是一个计数信号量，采用的是共享锁的方式来控制
-
-acquire(int)来获取信号量,直到只有一个可以用或者出现中断。
 
 release(int)用来释放信号量，将信号量数量返回给Semaphore
 
-~~~java
-    public void acquire(int permits) throws InterruptedException {
-        if (permits < 0) throw new IllegalArgumentException();
-        sync.acquireSharedInterruptibly(permits);
-    }
-==================
-   public final void acquireSharedInterruptibly(int arg)
-            throws InterruptedException {
-        if (Thread.interrupted())
-            throw new InterruptedException();
-        if (tryAcquireShared(arg) < 0)
-            doAcquireSharedInterruptibly(arg);
-    }
-==============
-    tryAcquireShared实际调用nonfairTryAcquireShared方法
-       final int nonfairTryAcquireShared(int acquires) {
-            for (;;) {
-                int available = getState(); //getState 这里的state是信号量的数量
-                int remaining = available - acquires;
-                if (remaining < 0 ||
-                    compareAndSetState(available, remaining))
-                    return remaining;
-            }
-        }
-  ===========
-    private void doAcquireSharedInterruptibly(int arg)
-        throws InterruptedException {
-        final Node node = addWaiter(Node.SHARED);
-        boolean failed = true;
-        try {
-            for (;;) {
-                final Node p = node.predecessor();
-                if (p == head) {
-                    int r = tryAcquireShared(arg);
-                    if (r >= 0) {
-                        setHeadAndPropagate(node, r);
-                        p.next = null; // help GC
-                        failed = false;
-                        return;
-                    }
-                }
-                if (shouldParkAfterFailedAcquire(p, node) &&
-                    parkAndCheckInterrupt())
-                    throw new InterruptedException();
-            }
-        } finally {
-            if (failed)
-                cancelAcquire(node);
-        }
-    }
-====================
-  
-~~~
-
-### 应用场景
+### 应用场景 2
 
 1 Semaphore可以用来做流量分流，特别是对公共资源有限的场景，比如数据库连接。
 
@@ -1113,21 +1057,19 @@ public class SemaphoreTest {
 
 ## 4.LockSupport 
 
-LockSupport 和 CAS 是Java并发包中很多并发工具控制机制的基础，它们底层其实都是依赖Unsafe实现
+LockSupport 实际做的是情和Object的wait和notify/notifyAll是类似的。但是wait和notify有个重要的限制是**它们必须放在同步块中执行**，而LockSupport可以单独执行。其次是LockSupport具有较高的灵活性，wait和notify的使用具有顺序性，需要先wait再notify，如果先notify在调用wait就会一直阻塞。 换做LockSupportt就支持线程先调用unpark后，再调用park而不被阻塞。
 
-LockSupport是用来创建锁和其他同步类的基本**线程阻塞**  "原语"。
+**总结一下，LockSupport比Object的wait/notify有两大优势**：
 
-LockSupport的pack挂起线程，unpack唤醒被挂起的线程
+①LockSupport不需要在同步代码块里 。所以线程间也不需要维护一个共享的同步对象了，实现了线程间的解耦。
 
-pack时
+②unpark函数可以先于park调用，所以不需要担心线程间的执行的先后顺序。
 
-如果线程的permit（信号量是1） 存在，那么线程不会被挂起，立即返回；如果线程的permit(信号量是1)不存在，认为线程缺少permit，所以需要挂起等待permit。
 
- unpack时
 
-如果线程的permit不存在，那么释放一个permit。因为有permit了，所以如果线程处于挂起状态，那么此线程会被线程调度器唤醒。如果线程的permit存在，permit也不会累加，看起来想什么事都没做一样。注意这一点和Semaphore是不同的。
+LockSupport 和 CAS 是Java并发包中很多并发工具控制机制的基础，它们底层其实都是依赖Unsafe实现是用来创建锁和其他同步类的基本**线程阻塞**  "原语"。LockSupport的pack挂起线程，unpack唤醒被挂起的线程
 
- LockSupport 很类似于二元信号量(只有1个许可证可供使用， 信号量(0,1),默认是0.)，如果这个许可还没有被占用，当前线程获取许可并继 续 执行；如果许可已经被占用，当前线 程阻塞，等待获取许可。
+ LockSupport 很类似于二元信号量(只有1个许可证可供使用， 信号量(0,1),默认是0.)，如果这个许可还没有被占用，当前线程获取许可并继 续 执行；如果许可已经被占用，当前线 程阻塞，等待获取许可。默认许可是被占用的，所以线程占用了许可能正常运行。
 
 ~~~java
 LockSupport.park();
@@ -1162,8 +1104,6 @@ public static void t2() throws Exception
 ---------------------
 最终线程会打印出thread over.true。这说明 线程如果因为调用park而阻塞的话，能够响应中断请求(中断状态被设置成true)，但是不会抛出InterruptedException 。
 ~~~
-
-
 
 **源码分析**
 
