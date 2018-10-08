@@ -1259,7 +1259,86 @@ class Application {
 
 ## 7.CyclicBarrier（循环栅栏）
 
-## 
+### CyclicBarrier是什么
+
+CyclicBarrier也叫同步屏障，在JDK1.5被引入，可以让一组线程达到一个屏障时被阻塞，直到最后一个线程达到屏障时，所以被阻塞的线程才能继续执行。(相当于为一组线程设置一排栅栏，直到所有线程都到了来开放栅栏通道)、
+
+**构造方法**
+
+1. 默认的构造方法是CyclicBarrier(int parties)，其参数表示屏障拦截的线程数量，**每个线程调用await方法告诉CyclicBarrier已经到达屏障位置**，线程被阻塞。
+2. 另外一个构造方法CyclicBarrier(int parties, Runnable barrierAction)，其中barrierAction任务会在所有线程到达屏障后执行。
+
+
+
+![img](https:////upload-images.jianshu.io/upload_images/2184951-b972911b7debef14.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/566/format/webp)
+
+### 应用场景
+
+~~~java
+public class CyclicBarrierDemo {
+    public static final int INIT_SIZE = 4;
+    private static CyclicBarrier barrier;
+    public static void main(String[] args) {
+        System.out.println("开启CyclicBarrier屏障（裁判员就位）");
+        //初始化CyclicBarrier
+        barrier = new CyclicBarrier(INIT_SIZE, new Runnable() {
+            public void run() {
+                System.out.println(Thread.currentThread().getName()+"线程通知:所有线程都已经准备好了,CyclicBarrier屏障去除（所有运动员都准备完毕，发信号枪）");
+            }
+        });
+        //开启4个线程，充当运动员
+        for (int i=0;i<INIT_SIZE;i++){
+            new ThreadDemo().start();
+        }
+
+    }
+
+    static class ThreadDemo extends Thread {
+        @Override
+        public void run() {
+            try {
+                System.out.println(Thread.currentThread().getName()+"线程准备好了,等待CyclicBarrier屏障去除（一名运动员准备好了）");
+                barrier.await(); // 通过调用barrier栅栏的等待方法来停止线程，只有栅栏开放了才接着执行下面的方法
+                System.out.println(Thread.currentThread().getName()+"线程继续运行（开始跑）");
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+---------------------
+    执行结果：
+    开启CyclicBarrier屏障（裁判员就位）
+Thread-0线程准备好了,等待CyclicBarrier屏障去除（一名运动员准备好了）
+Thread-1线程准备好了,等待CyclicBarrier屏障去除（一名运动员准备好了）
+Thread-3线程准备好了,等待CyclicBarrier屏障去除（一名运动员准备好了）
+Thread-2线程准备好了,等待CyclicBarrier屏障去除（一名运动员准备好了）
+Thread-2线程通知:所有线程都已经准备好了,CyclicBarrier屏障去除（所有运动员都准备完毕，发信号枪）
+Thread-2线程继续运行（开始跑）
+Thread-1线程继续运行（开始跑）
+Thread-0线程继续运行（开始跑）
+Thread-3线程继续运行（开始跑）
+
+---------------------
+
+
+~~~
+
+### CyclicBarrier和CountDownLatch区别
+
+| CountDownLatch                                               | CyclicBarrier                                                |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 减计数方式                                                   | 加计数方式                                                   |
+| 计算为0时释放所有等待的线程                                  | 计数达到指定值时释放所有等待线程                             |
+| 计数为0时，无法重置                                          | 计数达到指定值时，计数置为0重新开始                          |
+| 调用countDown()方法计数减一，调用await()方法只进行阻塞，对计数没任何影响 | 调用await()方法计数加1，若加1后的值不等于构造方法的值，则线程阻塞 |
+| 不可重复利用                                                 | 可重复利用                                                   |
+
+
 
 # 7 并发容器
 
