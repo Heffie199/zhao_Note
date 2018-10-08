@@ -1408,9 +1408,61 @@ return null;
 - 能够快速定位元素：Map的需求就是能够根据一个查询条件尽可能快速得到需要的结果（哈希算法）。
 - 能够自动扩充容量：显然对于容器而然，不需要人工的去控制容器的容量是最好的，这样对于外部使用者来说越少知道底部细节越好，不仅使用方便，也越安全。
 
+**HashMap为什么不安全**
+
+HashMap底层维护一个数组，数组中的每一项都是一个Entry
+
+~~~java
+transient Entry<K,V>[] table;
+~~~
+
+向 HashMap 中所放置的对象实际上是存储在该数组当中； 而Map中的key，value则以Entry的形式存放在数组中
+
+~~~java
+static class Entry<K,V> implements Map.Entry<K,V> {
+        final K key;
+        V value;
+        Entry<K,V> next;
+        int hash;
+~~~
+
+而这个Entry应该放在数组的哪一个位置上（这个位置通常称为位桶或者hash桶，即hash值相同的Entry会放在同一位置，用链表相连），是通过key的hashCode来计算的
+
+通过hash计算出来的值将会使用indexFor方法找到它应该所在的table下标
+
+当两个key通过hashCode计算相同时，则发生了hash冲突(碰撞)，HashMap解决hash冲突的方式是用链表。
+
+当发生hash冲突时，则将存放在数组中的Entry设置为新值的next（这里要注意的是，比如A和B都hash后都映射到下标i中，之前已经有A了，当map.put(B)时，将B放到下标i中，A则为B的next，所以新值存放在数组中，旧值在新值的链表上）
+
+
+
 **ConcurrentHashMap**
 
 ConcurrentHashMap是一个经常被使用的数据结构，相比于Hashtable以及Collections.synchronizedMap()，ConcurrentHashMap在线程安全的基础上提供了更好的写并发能力。
+
+### **ConcurrentHashMap原理分析**
+
+HashTable是一个线程安全的类，它使用synchronized来锁住整张Hash表来实现线程安全，即每次锁住整张表让线程独占。ConcurrentHashMap允许多个修改操作并发进行，其关键在于使用了锁分离技术。它使用了多个锁来控制对hash表的不同部分进行的修改。ConcurrentHashMap内部使用段(Segment)来表示这些不同的部分，每个段其实就是一个小的Hashtable，它们有自己的锁。只要多个修改操作发生在不同的段上，它们就可以并发进行。
+
+有些方法需要跨段，比如size()和containsValue()，它们可能需要锁定整个表而而不仅仅是某个段，这需要按顺序锁定所有段，操作完毕后，又按顺序释放所有段的锁。这里“按顺序”是很重要的，否则极有可能出现死锁。
+
+ConcurrentHashMap使用分段锁技术，将数据分成一段一段的存储，然后给每一段数据配一把锁，当一个线程占用锁访问其中一个段数据的时候，其他段的数据也能被其他线程访问，能够实现真正的并发访问。
+
+ConcurrentHashMap内部分为很多个Segment，每一个Segment拥有一把锁，然后每个Segment（继承ReentrantLock）
+
+~~~java
+static final class Segment<K,V> extends ReentrantLock implements Serializable
+~~~
+
+Segment继承了ReentrantLock，表明每个segment都可以当做一个锁。
+
+Segment下面包含很多个HashEntry列表数组。对于一个key，需要经过三次（为什么要hash三次下文会详细讲解）hash操作，才能最终定位这个元素的位置，这三次hash分别为：
+
+1. 对于一个key，先进行一次hash操作，得到hash值h1，也即h1 = hash1(key)；
+2. 将得到的h1的高几位进行第二次hash，得到hash值h2，也即h2 = hash2(h1高几位)，通过h2能够确定该元素的放在哪个Segment；
+3. 将得到的h1进行第三次hash，得到hash值h3，也即h3 = hash3(h1)，通过h3能够确定该元素放置在哪个HashEntry。
+
+ConcurrentHashMap中主要实体类就是三个：ConcurrentHashMap（整个Hash表）,Segment（段），HashEntry（节点）
 
 
 
