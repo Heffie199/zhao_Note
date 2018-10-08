@@ -1338,17 +1338,85 @@ Thread-3线程继续运行（开始跑）
 | 调用countDown()方法计数减一，调用await()方法只进行阻塞，对计数没任何影响 | 调用await()方法计数加1，若加1后的值不等于构造方法的值，则线程阻塞 |
 | 不可重复利用                                                 | 可重复利用                                                   |
 
-
+**线程在countDown()之后，会继续执行自己的任务，而CyclicBarrier会在所有线程任务结束之后，才会进行后续任务**
 
 # 7 并发容器
 
-## 1.集合包装
+java 5.0增加了两种新的容器类型，Queue和BlockingQueue，队列的特点是先进先出，插入和移除操作分别仅能在队列的两端操作。BlockingQueue比Queue多了put、take、offer和poll，他们分别是阻塞插入、阻塞移除、定时阻塞插入和定时阻塞移除。 
 
-## 2.ConcurrentHashMap
+事实上，Queue是通过LinkedList实现的（队列的修改操作仅限首尾端，用链表比数组更好），因为它能去掉List的随机访问功能，从而实现了更高效的开发，封装性更好。 
 
-## 3 BlockingQueue
+## 1.ConcurrentHashMap
 
-## 4 ConcurrentLinkQueue
+ConcurrentHashMap是HashMap的线程安全版本，ConcurrentSkipListMap是TreeMap的线程安全版本。(hashtable过时)
+
+![ConcurrentMap API](http://www.blogjava.net/images/blogjava_net/xylz/WindowsLiveWriter/JavaConcurrency16part1ConcurrentMap1_10A52/image_thumb_1.png)  除了实现Map接口里面对象的方法外，ConcurrentHashMap还实现了ConcurrentMap里面的四个方法
+
+**V putIfAbsent(K key,V value)**
+
+如果不存在key对应的值，则将key--value加入Map，否则返回key对应的旧值
+
+~~~java
+//putIfAbsent()等价于下面的代码
+if (!map.containsKey(key)) 
+   return map.put(key, value);
+else
+   return map.get(key);
+~~~
+
+**boolean remove(Object key,Object value)**
+
+只有在map中key对应的值是value才能删除对应的key-value	
+
+~~~java
+if (map.containsKey(key) && map.get(key).equals(value)) {
+   map.remove(key);
+   return true;
+}
+return false;
+~~~
+
+**boolean replace(K key,V oldValue,V newValue)**
+
+只有在map中key对应的值是oldValue,才能替换成newValue
+
+~~~java
+if (map.containsKey(key) && map.get(key).equals(oldValue)) {
+   map.put(key, newValue);
+   return true;
+}
+return false;
+~~~
+
+**V replace(K key,V value)**
+
+只有当前键存在的时候更新此键对于的值
+
+~~~java
+if (map.containsKey(key)) {
+   return map.put(key, value);
+}
+return null;
+~~~
+
+**HashMap原理**
+
+从头设想。要将对象存放在一起，如何设计这个容器。目前只有两条路可以走，一种是采用分格技术（数组的概念），每一个对象存放于一个格子中，这样通过对格子的编号就能取到或者遍历对象；另一种技术就是采用串联的方式（链表的概念），将各个对象串联起来，这需要各个对象至少带有下一个对象的索引（或者指针）。所有的容器的实现其实都是基于这两种方式的，不管是数组还是链表，或者二者俱有。HashMap采用的就是数组的方式。
+
+有了存取对象的容器后还需要以下两个条件才能完成Map所需要的条件。
+
+- 能够快速定位元素：Map的需求就是能够根据一个查询条件尽可能快速得到需要的结果（哈希算法）。
+- 能够自动扩充容量：显然对于容器而然，不需要人工的去控制容器的容量是最好的，这样对于外部使用者来说越少知道底部细节越好，不仅使用方便，也越安全。
+
+**ConcurrentHashMap**
+
+ConcurrentHashMap是一个经常被使用的数据结构，相比于Hashtable以及Collections.synchronizedMap()，ConcurrentHashMap在线程安全的基础上提供了更好的写并发能力。
+
+
+
+## 2 BlockingQueue
+
+## 3 ConcurrentLinkQueue
 
 
 
