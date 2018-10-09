@@ -1536,7 +1536,7 @@ BlockingQueue 的实现都是**线程安全**的，但是批量的集合操作�
 
 最后，BlockingQueue 在生产者-消费者的场景中，是支持多消费者和多生产者的，说的其实就是线程安全问题。
 
-### BlockingQueue 实现之 ArrayBlockingQueue
+###  ArrayBlockingQueue
 
  ArrayBlockingQueue 是 BlockingQueue 接口的有界队列实现类，底层采用数组来实现。
 
@@ -1570,7 +1570,7 @@ ArrayBlockingQueue 实现并发同步的原理就是，读操作和写操作都�
 2. 指定独占锁是公平锁还是非公平锁。非公平锁的吞吐量比较高，公平锁可以保证每次都是等待最久的线程获取到锁；
 3. 可以指定用一个集合来初始化，将此集合中的元素在构造方法期间就先添加到队列中。
 
-### BlockingQueue 实现之 LinkedBlockingQueue
+###  LinkedBlockingQueue
 
 底层基于单向链表实现的阻塞队列，可以当做无界队列也可以当做有界队列来使用
 
@@ -1634,11 +1634,127 @@ public LinkedBlockingQueue(int capacity) {
 这里会初始化一个空的头结点，那么第一个元素入队的时候，队列中就会有两个元素。读取元素时，也总是获取头节点后面的一个节点。count 的计数值不包括这个头节点。
 ~~~
 
+put 方法是怎么将元素插入到队尾的：
+
+```java
+public void put(E e) throws InterruptedException {
+    if (e == null) throw new NullPointerException();
+    // 如果你纠结这里为什么是 -1，可以看看 offer 方法。这就是个标识成功、失败的标志而已。
+    int c = -1;
+    Node<E> node = new Node(e);
+    final ReentrantLock putLock = this.putLock;
+    final AtomicInteger count = this.count;
+    // 必须要获取到 putLock 才可以进行插入操作
+    putLock.lockInterruptibly();  //如果加锁不成功会进行中断
+    try {
+        // 如果队列满，等待 notFull 的条件满足。
+        while (count.get() == capacity) {
+            notFull.await();
+        }
+        // 入队
+        enqueue(node);
+        // count 原子加 1，c 还是加 1 前的值
+        c = count.getAndIncrement();
+        // 如果这个元素入队后，还有至少一个槽可以使用，调用 notFull.signal() 唤醒等待线程
+        if (c + 1 < capacity)
+            notFull.signal();
+    } finally {
+        // 入队后，释放掉 putLock
+        putLock.unlock();
+    }
+    // 如果 c == 0，那么代表队列在这个元素入队前是空的（不包括head空节点），
+    // 那么所有的读线程都在等待 notEmpty 这个条件，等待唤醒，这里做一次唤醒操作
+    if (c == 0)
+        signalNotEmpty();
+}
+
+// 入队的代码非常简单，就是将 last 属性指向这个新元素，并且让原队尾的 next 指向这个元素
+// 这里入队没有并发问题，因为只有获取到 putLock 独占锁以后，才可以进行此操作
+private void enqueue(Node<E> node) {
+    // assert putLock.isHeldByCurrentThread();
+    // assert last.next == null;
+    last = last.next = node;
+}
+
+// 元素入队后，如果需要，调用这个方法唤醒读线程来读
+private void signalNotEmpty() {
+    final ReentrantLock takeLock = this.takeLock;
+    takeLock.lock();
+    try {
+        notEmpty.signal();
+    } finally {
+        takeLock.unlock();
+    }
+}
+```
+
+我们再看看 take 方法：
+
+```java
+public E take() throws InterruptedException {
+    E x;
+    int c = -1;
+    final AtomicInteger count = this.count;
+    final ReentrantLock takeLock = this.takeLock;
+    // 首先，需要获取到 takeLock 才能进行出队操作
+    takeLock.lockInterruptibly();
+    try {
+        // 如果队列为空，等待 notEmpty 这个条件满足再继续执行
+        while (count.get() == 0) {
+            notEmpty.await();
+        }
+        // 出队
+        x = dequeue();
+        // count 进行原子减 1
+        c = count.getAndDecrement();
+        // 如果这次出队后，队列中至少还有一个元素，那么调用 notEmpty.signal() 唤醒其他的读线程
+        if (c > 1)
+            notEmpty.signal();
+    } finally {
+        // 出队后释放掉 takeLock
+        takeLock.unlock();
+    }
+    // 如果 c == capacity，那么说明在这个 take 方法发生的时候，队列是满的
+    // 既然出队了一个，那么意味着队列不满了，唤醒写线程去写
+    if (c == capacity)
+        signalNotFull();
+    return x;
+}
+// 取队头，出队
+private E dequeue() {
+    // assert takeLock.isHeldByCurrentThread();
+    // assert head.item == null;
+    // 之前说了，头结点是空的
+    Node<E> h = head;
+    Node<E> first = h.next;
+    h.next = h; // help GC
+    // 设置这个为新的头结点
+    head = first;
+    E x = first.item;
+    first.item = null;
+    return x;
+}
+// 元素出队后，如果需要，调用这个方法唤醒写线程来写
+private void signalNotFull() {
+    final ReentrantLock putLock = this.putLock;
+    putLock.lock();
+    try {
+        notFull.signal();
+    } finally {
+        putLock.unlock();
+    }
+}
+```
+
 
 
 ## 3 ConcurrentLinkQueue
 
+```
 
+顾名思义： 同步链表队列，一个基于链接节点的无界线程安全队列。此队列按照 FIFO（先进先出）原则对元素进行排序。队列的头部 是队列中时间最长的元素。队列的尾部 是队列中时间最短的元素。
+新的元素插入到队列的尾部，队列获取操作从队列头部获得元素。当多个线程共享访问一个公共 collection 时，ConcurrentLinkedQueue 是一个恰当的选择。此队列不允许使用 null 元素。
+```
 
 # 8 线程池
 
