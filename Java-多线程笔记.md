@@ -1518,9 +1518,121 @@ ConcurrentHashMap中主要实体类就是三个：ConcurrentHashMap（整个Hash
 　　drainTo():一次性从BlockingQueue获取所有可用的数据对象（还可以指定获取数据的个数）， 
 　　　　通过该方法，可以提升获取数据效率；不需要多次分批加锁或释放锁。
 
-发撒
+| 方法\处理方式 | 抛出异常  | 返回特殊值 | 一直阻塞   | 超时退出           |
+| :-----------: | --------- | ---------- | ---------- | ------------------ |
+|   插入方法    | add(e)    | offer(e)   | **put(e)** | offer(e,time,unit) |
+|   移除方法    | remove()  | poll()     | **take()** | poll(time,unit)    |
+|   检查方法    | element() | peek()     | 不可用     | 不可用             |
 
+对于 BlockingQueue，我们的关注点应该在 put(e) 和 take() 这两个方法，因为这两个方法是带阻塞的。
 
+BlockingQueue 不接受 null 值的插入，相应的方法在碰到 null 的插入时会抛出 NullPointerException 异常。null 值在这里通常用于作为特殊值返回（表格中的第三列），代表 poll 失败。所以，如果允许插入 null 值的话，那获取的时候，就不能很好地用 null 来判断到底是代表失败，还是获取的值就是 null 值。
+
+一个 BlockingQueue 可能是有界的，如果在插入的时候，发现队列满了，那么 put 操作将会阻塞。通常，在这里我们说的无界队列也不是说真正的无界，而是它的容量是 Integer.MAX_VALUE。
+
+BlockingQueue 是设计用来实现生产者-消费者队列的，当然，你也可以将它当做普通的 Collection 来用(BlockingQueue 是一个接口，继承自 Queue，所以其实现类也可以作为 Queue 的实现来使用，而 Queue 又继承自 Collection 接口。)
+
+BlockingQueue 的实现都是**线程安全**的，但是批量的集合操作如 `addAll`, `containsAll`, `retainAll` 和 `removeAll` 不一定是原子操作。如 addAll(c) 有可能在添加了一些元素后中途抛出异常，此时 BlockingQueue 中已经添加了部分元素，这个是允许的，取决于具体的实现。
+
+最后，BlockingQueue 在生产者-消费者的场景中，是支持多消费者和多生产者的，说的其实就是线程安全问题。
+
+### BlockingQueue 实现之 ArrayBlockingQueue
+
+ ArrayBlockingQueue 是 BlockingQueue 接口的有界队列实现类，底层采用数组来实现。
+
+它采用一个 ReentrantLock 和相应的两个 Condition 来实现。
+
+ArrayBlockingQueue 共有以下几个属性：
+
+~~~java
+// 用于存放元素的数组
+final Object[] items;
+// 下一次读取操作的位置
+int takeIndex;
+// 下一次写入操作的位置
+int putIndex;
+// 队列中的元素数量
+int count;
+
+// 以下几个就是控制并发用的同步器
+final ReentrantLock lock;
+private final Condition notEmpty;
+private final Condition notFull;
+~~~
+
+![array-blocking-queue](https://javadoop.com/blogimages/java-concurrent-queue/array-blocking-queue.png)
+
+ArrayBlockingQueue 实现并发同步的原理就是，读操作和写操作都需要获取到 AQS 独占锁才能进行操作。如果队列为空，这个时候读操作的线程进入到**读线程队列**排队，等待写线程写入新的元素，然后唤醒读线程队列的第一个等待线程。如果队列已满，这个时候写操作的线程进入到**写线程队列**排队，等待读线程将队列元素移除腾出空间，然后唤醒写线程队列的第一个等待线程。
+
+对于 ArrayBlockingQueue，我们可以在构造的时候指定以下三个参数：
+
+1. 队列容量，其限制了队列中最多允许的元素个数；
+2. 指定独占锁是公平锁还是非公平锁。非公平锁的吞吐量比较高，公平锁可以保证每次都是等待最久的线程获取到锁；
+3. 可以指定用一个集合来初始化，将此集合中的元素在构造方法期间就先添加到队列中。
+
+### BlockingQueue 实现之 LinkedBlockingQueue
+
+底层基于单向链表实现的阻塞队列，可以当做无界队列也可以当做有界队列来使用
+
+```java
+// 传说中的无界队列
+public LinkedBlockingQueue() {
+    this(Integer.MAX_VALUE);
+}
+// 传说中的有界队列
+public LinkedBlockingQueue(int capacity) {
+    if (capacity <= 0) throw new IllegalArgumentException();
+    this.capacity = capacity;
+    last = head = new Node<E>(null);
+}
+```
+
+这个类属性：
+
+~~~java
+// 队列容量
+private final int capacity;
+
+// 队列中的元素数量
+private final AtomicInteger count = new AtomicInteger(0);
+
+// 队头
+private transient Node<E> head;
+
+// 队尾
+private transient Node<E> last;
+
+// take, poll, peek 等读操作的方法需要获取到这个锁
+private final ReentrantLock takeLock = new ReentrantLock();
+
+// 如果读操作的时候队列是空的，那么等待 notEmpty 条件
+private final Condition notEmpty = takeLock.newCondition();
+
+// put, offer 等写操作的方法需要获取到这个锁
+private final ReentrantLock putLock = new ReentrantLock();
+
+// 如果写操作的时候队列是满的，那么等待 notFull 条件
+private final Condition notFull = putLock.newCondition();
+~~~
+
+**takeLock 和 notEmpty 怎么搭配：**如果要获取（take）一个元素，需要获取 takeLock 锁，但是获取了锁还不够，如果队列此时为空，还需要队列不为空（notEmpty）这个条件（Condition）。
+
+**putLock 需要和 notFull 搭配：**如果要插入（put）一个元素，需要获取 putLock 锁，但是获取了锁还不够，如果队列此时已满，还需要队列不是满的（notFull）这个条件（Condition）。
+
+![linked-blocking-queue](https://javadoop.com/blogimages/java-concurrent-queue/linked-blocking-queue.png)
+
+读操作是排好队的，写操作也是排好队的，唯一的并发问题在于一个写操作和一个读操作同时进行
+
+构造方法：
+
+~~~java
+public LinkedBlockingQueue(int capacity) {
+    if (capacity <= 0) throw new IllegalArgumentException();
+    this.capacity = capacity;
+    last = head = new Node<E>(null); //整个队列初始化时都执行一个属性为null的新节点。
+}
+这里会初始化一个空的头结点，那么第一个元素入队的时候，队列中就会有两个元素。读取元素时，也总是获取头节点后面的一个节点。count 的计数值不包括这个头节点。
+~~~
 
 
 
