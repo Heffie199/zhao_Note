@@ -336,7 +336,7 @@ static final class Node {
         Node() { 
         }
 
-        Node(Thread thread, Node mode) {     // Used by addWaiter
+        Node(Thread thread, Node mode) { // Used by addWaiter，将当前线程创建为一个什么模式的节点
             this.nextWaiter = mode;
             this.thread = thread;
         }
@@ -349,6 +349,10 @@ static final class Node {
 ~~~
 
 ![img](https://images2018.cnblogs.com/blog/1400011/201805/1400011-20180513211820725-389872507.png)
+
+![aqs-0](https://javadoop.com/blogimages/AbstractQueuedSynchronizer/aqs-0.png)
+
+（阻塞队列不包含 head，head节点标识持有锁的线程，所在阻塞队列中）
 
 AbstractQueuedSynchronizer的三个重要属性
 
