@@ -1442,9 +1442,13 @@ static class Entry<K,V> implements Map.Entry<K,V> {
 
 值得注意的是，当key为null时，都放到table[0]中
 
+**为什么说HashMap是线程不安全的**
+
+主要是在resize调用了transfer方法的时候，rehash在同一位置上的节点转移到新table上的时候会从原来的1->2,变成2->1在多线程情况下如此操作链表会导致死循环。
+
 **ConcurrentHashMap**
 
-ConcurrentHashMap是一个经常被使用的数据结构，相比于Hashtable以及Collections.synchronizedMap()，ConcurrentHashMap在线程安全的基础上提供了更好的写并发能力。
+ConcurrentHashMap是一个经常被使用的数据结构，相比于Hashtable以及Collections.synchronizedMap()，ConcurrentHashMap在线程安全的基础上提供了更好的写并发能力。ConcurrentHashMap比hashMap线程安全，顺着上面的思路如果在resize（）和transfer（）这两个方法调用的时候加上同步不就可以解决
 
 ### **ConcurrentHashMap原理分析**
 
@@ -1474,11 +1478,51 @@ ConcurrentHashMap中主要实体类就是三个：ConcurrentHashMap（整个Hash
 
 ![img](https://pic3.zhimg.com/v2-2541e2932c5390dc549a6ea05bfb97a6_b.jpg)
 
-**concurrencyLevel**：并行级别、并发数、Segment 数。默认是 16，也就是说 ConcurrentHashMap 有 16 个 Segments，所以理论上，这个时候，最多可以同时支持 16 个线程并发写，只要它们的操作分别分布在不同的 Segment 上。这个值可以在初始化的时候设置为其他值，但是一旦初始化以后，它是不可以扩容的。
+**concurrencyLevel**：(等价于hashmap中的threhold)并行级别、并发数、Segment 数。默认是 16，也就是说 ConcurrentHashMap 有 16 个 Segments，所以理论上，这个时候，最多可以同时支持 16 个线程并发写，只要它们的操作分别分布在不同的 Segment 上。这个值可以在初始化的时候设置为其他值，但是一旦初始化以后，它是不可以扩容的。
+
+具体到每个 Segment 内部，其实每个 Segment 很像之前介绍的 HashMap,Segment 内部是由 **数组+链表** 组成的
 
 
 
 ## 2 BlockingQueue
+
+  在新增的Concurrent包中，BlockingQueue很好的解决了多线程中，如何高效安全“传输”数据的问题.通过这些高效并且线程安全的队列类，为我们快速搭建高质量的多线程程序带来极大的便利。
+
+阻塞队列，顾名思义，首先它是一个队列，最基本的来说， BlockingQueue 是一个**先进先出**的队列（Queue）。
+
+为什么说BlockingQueue是阻塞的？
+
+阻塞队列（BlockingQueue）**支持**两个附加操作的队列。这两个附加的操作是：在队列为空时，获取元素的线程会等待队列变为非空。当队列满时，存储元素的线程会等待队列可用。阻塞队列常用于生产者和消费者的场景，生产者是往队列里添加元素的线程，消费者是从队列里拿元素的线程。阻塞队列就是生产者存放元素的容器，而消费者也只从容器里拿元素。
+
+![img](https://pic002.cnblogs.com/images/2010/161940/2010112414472791.jpg)
+
+ 多线程环境中，通过队列可以很容易实现数据共享，比如经典的“生产者”和“消费者”模型。
+
+在concurrent包发布以前，在多线程环境下的生产消费模型中，如果生产者产出数据的速度大于消费者消费的速度，并且当生产出来的数据累积到一定程度的时候，那么生产者必须暂停等待一下（阻塞生产者线程），以便等待消费者线程把累积的数据处理完毕，反之亦然。程序员都必须去自己控制这些细节，尤其还要兼顾效率和线程安全。BlockingQueue出现后，就无需我们自己来解决这些问题（在多线程领域：所谓阻塞，在某些情况下会挂起线程（即阻塞），一旦条件满足，被挂起的线程又会自动被唤醒）。作为BlockingQueue的使用者，我们再也不需要关心什么时候需要阻塞线程，什么时候需要唤醒线程，因为这一切BlockingQueue都给你一手包办了。
+
+**BlockingQueue的核心方法**：
+
+放入数据：
+　　offer(anObject):表示如果可能的话,将anObject加到BlockingQueue里,即如果BlockingQueue可以容纳,
+　　　　则返回true,否则返回false.（本方法不阻塞当前执行方法的线程）
+　　offer(E o, long timeout, TimeUnit unit),可以设定等待的时间，如果在指定的时间内，还不能加入BlockingQueue，则返回失败。
+　　put(anObject):把anObject加到BlockingQueue里,如果BlockQueue没有空间,则调用此方法的线程被阻断
+　　　　直到BlockingQueue里面有空间再继续.
+获取数据：
+　　poll(time):取走BlockingQueue里排在首位的对象,若不能立即取出,则可以等time参数规定的时间,
+　　　　取不到时返回null;
+　　poll(long timeout, TimeUnit unit)：从BlockingQueue取出一个队首的对象，如果在指定时间内，
+　　　　队列一旦有数据可取，则立即返回队列中的数据。否则知道时间超时还没有数据可取，返回失败。
+　　take():取走BlockingQueue里排在首位的对象,若BlockingQueue为空,阻断进入等待状态直到
+　　　　BlockingQueue有新的数据被加入; 
+　　drainTo():一次性从BlockingQueue获取所有可用的数据对象（还可以指定获取数据的个数）， 
+　　　　通过该方法，可以提升获取数据效率；不需要多次分批加锁或释放锁。
+
+发撒
+
+
+
+
 
 ## 3 ConcurrentLinkQueue
 
