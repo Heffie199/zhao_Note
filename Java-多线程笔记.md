@@ -1358,7 +1358,11 @@ public ReentrantLock(boolean fair) {
 
 通常在开发并发程序的时候，会碰到需要停止正在执行业务A，来执行另一个业务B，当业务B执行完成后业务A继续执行。ReentrantLock通过Condtion等待/唤醒这样的机制.
 
-condition 等价于synchronized关键字中使用的Object的wait()和notify方法,它和ReentrantLock结合起来用于线程的等待和唤醒，但是它更加的灵活，与Object下的wait() 只能有一个等待队列不同，Condition可以实现由多个条件下的等待队列，condition顾名思义可知，在不同的条件下可以创建不同的等待队列，调用一次lock.newCondition()就为lock下生成一个等待队列。
+condition 等价于synchronized关键字中使用的Object的wait()和notify方法,Condition 是基于 ReentrantLock 实现的。
+
+condition 是依赖于 ReentrantLock 的，不管是调用 await 进入等待还是 signal 唤醒，都必须获取到锁才能进行操作。
+
+它和ReentrantLock结合起来用于线程的等待和唤醒，但是它更加的灵活，与Object下的wait() 只能有一个等待队列不同，Condition可以实现由多个条件下的等待队列，condition顾名思义可知，在不同的条件下可以创建不同的等待队列，调用一次lock.newCondition()就为lock下生成一个等待队列。
 
 基本内容：
 
@@ -1372,17 +1376,47 @@ condition 等价于synchronized关键字中使用的Object的wait()和notify方�
 
 ![img](https://upload-images.jianshu.io/upload_images/5507455-37635d0723174712.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/923/format/webp)
 
+每个 ReentrantLock 实例可以通过调用多次 newCondition 产生多个 ConditionObject 的实例：
+
+```java
+final ConditionObject newCondition() {
+    return new ConditionObject();
+}
+```
+
+ Condition 的实现类 `AbstractQueuedSynchronizer` 类中的 `ConditionObject`。
+
+~~~java
+public class ConditionObject implements Condition, java.io.Serializable {
+        private static final long serialVersionUID = 1173984872572414699L;
+        // 条件队列的第一个节点
+      // 不要管这里的关键字 transient，是不参与序列化的意思
+        private transient Node firstWaiter;
+        // 条件队列的最后一个节点
+        private transient Node lastWaiter;    
+
+Condition内部维护了一个由线程封装的Node节点组成的单向链表(等待队列)，这个链表的作用是存放等待signal信号的线程。
+~~~
+
+ AQS 的时候，我们有一个**阻塞队列**（同步队列），用于保存等待获取锁的线程的队列。引入另一个概念，叫**条件队列**（condition queue）
+
+![condition-2](https://javadoop.com/blogimages/AbstractQueuedSynchronizer-2/aqs2-2.png)
+
+简单回顾下 AQS中Node 的属性：
+
+```java
+volatile int waitStatus; // 可取值 0、CANCELLED(1)、SIGNAL(-1)、CONDITION(-2)、PROPAGATE(-3)
+volatile Node prev;
+volatile Node next;
+volatile Thread thread;
+Node nextWaiter;
+```
+
+prev 和 next 用于实现阻塞队列的双向链表，**nextWaiter 用于实现条件队列的单向链表**；
+
 
 
 Condition是一个接口，它主要是由awiat和singal方法组成，awiat方法是放弃自身锁，进入阻塞状态，等待信号进行唤醒，singal是唤醒线程，让线程去重新竞争锁。它和Object的wait和notify方法是一样的。
-
-~~~java
-        //   头节点 
-        private transient Node firstWaiter;
-        //   尾节点
-        private transient Node lastWaiter;
-Condition内部维护了一个由线程封装的Node节点组成的单向链表(等待队列)，这个链表的作用是存放等待signal信号的线程。
-~~~
 
 Condition 的await()方法： 他做两件事，将当前线程加入到等待队列，和完全地解开加在线程上的锁。线程放弃共享资源的所有权(且线程暂时不挣抢资源)，进入等待	
 
