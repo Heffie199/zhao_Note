@@ -335,7 +335,7 @@ static final class Node {
 
         //下一个等待节点
         Node nextWaiter;
-
+    //nextWaiter 这个属性在这个时候是没用的，因为它用来实现 Condition
         Node() { 
         }
 
@@ -433,6 +433,7 @@ public ReentrantLock(boolean fair) {
 ~~~java
 static final class FairSync extends Sync {
       // 争锁
+    //ReentrantLock 具有排他性，lock() 方法要么阻塞，要么顺利拿到锁返回
     final void lock() {
         acquire(1);
     }
@@ -447,7 +448,8 @@ static final class FairSync extends Sync {
               selfInterrupt();
         }
     }
-
+//acquireQueued 一般会返回false。 acquireQueued 返回值代表的是：是否被中断过。但是，不管是否被中断过，acquireQueued 出来以后，线程的中断状态一定是 false，所以如果发生过中断，要重新设置中断状态。虽然 acquire(int arg) 确实是不关心中断的，但是它会保持这个状态，如果客户端想要知道是否发生过中断的话，还是可以知道的。因为中断情况下，中断状态虽然中间丢过，但是 selfInterrupt() 会设置回去。会实际受到中断影响的是另一个方法 acquireInterruptibly(int arg)，这个方法会通过抛出异常的方式告诉客户端。
+    
     /**
      *  Don't grant access unless recursive call or no waiters or is first.
      *  不允许访问，除非 递归调用(重入锁)或 无等待线程 或是 是第一个线程。
@@ -683,6 +685,59 @@ static final class FairSync extends Sync {
 
    // 仔细看shouldParkAfterFailedAcquire(p, node)，我们可以发现，其实第一次进来的时候，一般都不会返回true的，原因很简单，前驱节点的waitStatus=-1是依赖于后继节点设置的。也就是说，我都还没给前驱设置-1呢，怎么可能是true呢，但是要看到，这个方法是套在循环里的，所以第二次进来的时候状态就是-1了。
 }
+=================================================
+    waitStatus 中 SIGNAL(-1) 状态的意思，Doug Lea 注释的是：代表后继节点需要被唤醒。也就是说这个 waitStatus 其实代表的不是自己的状态，而是后继节点的状态，我们知道，每个 node 在入队的时候，都会把前驱节点的状态改为 SIGNAL，然后阻塞，等待被前驱唤醒
+    https://javadoop.com/post/AbstractQueuedSynchronizer
+===============================
+//acquireQueued(final Node node, int arg)方法的疑问
+boolean failed = true;
+try {
+    boolean interrupted = false;
+    for (;;) {
+        final Node p = node.predecessor();
+        if (p == head && tryAcquire(arg)) {
+            setHead(node);
+            p.next = null; // help GC
+            failed = false;
+            return interrupted;
+        }
+        if (shouldParkAfterFailedAcquire(p, node) &&
+            parkAndCheckInterrupt())
+            interrupted = true;
+    }
+} finally {
+   // 第一个问题：这个finally里的cancelAcquire 似乎永远都不会被执行吧
+  //答:这部分其实是用于响应中断或超时的
+    if (failed)
+        cancelAcquire(node);
+}
+//unparkSuccessor(Node node)
+Node s = node.next;
+    if (s == null || s.waitStatus > 0) {
+        s = null;
+        for (Node t = tail; t != null && t != node; t = t.prev)
+            if (t.waitStatus <= 0)
+                s = t;
+  //第二个问题：为什么都是要从tail往前找第一个状态是非CANCEL的节点呢，如果从head往后找第一个状态是非CANCEL的话效率会不会高一点
+    }
+    if (s != null)
+        LockSupport.unpark(s.thread);
+
+// 答：首先，第一行代码先检测 head 的后继节点，只有当此时的后继节点不存在或者这个后继节点取消了才开始从后往前找，所以大部分情况下，其实不会发生从后往前遍历整个队列的情况。（后继节点取消很正常，但是某节点在入队的时候，如果发现前驱是取消状态，前驱节点是会被请出队列的）
+//addWaiter(Node mode)加节点是加在尾部的 存在并发问题：从前往后寻找不一定能找到刚刚加入队列的后继节点
+ Node pred = tail;
+    if (pred != null) {
+        node.prev = pred;
+        // 1. 先设置的 tail
+        if (compareAndSetTail(pred, node)) {
+            // 2. 设置前驱节点的后继节点为当前节点
+            pred.next = node;
+            return node;
+        }
+    }
+//源码作者如此设计，巧妙的解决了并发问题。因为先node.prev = pred; 再compareAndSetTail(pred, node) 再 pred.next = node; 这种操作步奏 是安全的，以此为前提，如果从前往后找的话 如果执行完成 compareAndSetTail(pred, node)  而pred.next = node; 还未来的及执行的话 新加的tail是无法被遍历到的。
+
+
 ~~~
 
 **解锁操作**
