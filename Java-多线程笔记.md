@@ -1414,31 +1414,40 @@ Node nextWaiter;
 
 prev 和 next 用于实现阻塞队列的双向链表，**nextWaiter 用于实现条件队列的单向链表**；
 
-
+1. 我们知道一个 ReentrantLock 实例可以通过多次调用 newCondition() 来产生多个 Condition 实例，这里对应 condition1 和 condition2。注意，ConditionObject 只有两个属性 firstWaiter 和 lastWaiter；
+2. 每个 condition 有一个关联的**条件队列**，如线程 1 调用 condition1.await() 方法即可将当前线程 1 包装成 Node 后加入到条件队列中，然后阻塞在这里，不继续往下执行，条件队列是一个单向链表；调用 condition1.signal() 会将condition1 对应的**条件队列**的 firstWaiter 移到**阻塞队列**的队尾，等待获取锁，获取锁后 await 方法返回，继续往下执行。
 
 Condition是一个接口，它主要是由awiat和singal方法组成，awiat方法是放弃自身锁，进入阻塞状态，等待信号进行唤醒，singal是唤醒线程，让线程去重新竞争锁。它和Object的wait和notify方法是一样的。
 
 Condition 的await()方法： 他做两件事，将当前线程加入到等待队列，和完全地解开加在线程上的锁。线程放弃共享资源的所有权(且线程暂时不挣抢资源)，进入等待	
 
 ~~~java
-       public final void await() throws InterruptedException {
-            if (Thread.interrupted())
-                throw new InterruptedException();
-            Node node = addConditionWaiter(); //将当前线程封装为线程等待单链表的尾节点
-            int savedState = fullyRelease(node); //完全的释放当前线程占有的锁
-            int interruptMode = 0;
-            while (!isOnSyncQueue(node)) { //判断当前线程是否是在可以挣抢资源的同步队列中
-                LockSupport.park(this); //挂起当前线程
-                if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
-                    break;
-            }
-            if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
-                interruptMode = REINTERRUPT;
-            if (node.nextWaiter != null) // clean up if cancelled
-                unlinkCancelledWaiters();
-            if (interruptMode != 0)
-                reportInterruptAfterWait(interruptMode);
-        }
+// 首先，这个方法是可被中断的，不可被中断的是另一个方法 awaitUninterruptibly()
+// 这个方法会阻塞，直到调用 signal 方法（指 signal() 和 signalAll()，下同），或被中断
+public final void await() throws InterruptedException {
+    if (Thread.interrupted())
+        throw new InterruptedException();
+    // 添加到 condition 的条件队列中
+    Node node = addConditionWaiter();
+    // 释放锁，返回值是释放锁之前的 state 值
+    int savedState = fullyRelease(node);
+    int interruptMode = 0;
+    // 这里退出循环有两种情况，之后再仔细分析
+    // 1. isOnSyncQueue(node) 返回 true，即当前 node 已经转移到阻塞队列了
+    // 2. checkInterruptWhileWaiting(node) != 0 会到 break，然后退出循环，代表的是线程中断
+    while (!isOnSyncQueue(node)) {
+        LockSupport.park(this);
+        if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+            break;
+    }
+    // 被唤醒后，将进入阻塞队列，等待获取锁
+    if (acquireQueued(node, savedState) && interruptMode != THROW_IE)
+        interruptMode = REINTERRUPT;
+    if (node.nextWaiter != null) // clean up if cancelled
+        unlinkCancelledWaiters();
+    if (interruptMode != 0)
+        reportInterruptAfterWait(interruptMode);
+}
 ~~~
 
 相比较synchronize的wait()和notify()/notifAll()的机制而言，Condition具有更高的灵活性，这个很关键。Conditon可以实现多路通知和选择性通知。当使用notify()/notifAll()时，JVM时随机通知线程的，具有很大的不可控性，所以建议使用Condition。Condition使用起来也非常方便，只需要注册到ReentrantLock下面即可。
