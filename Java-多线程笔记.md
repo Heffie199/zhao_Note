@@ -726,17 +726,12 @@ protected final boolean tryRelease(int releases) {
  * Wakes up node's successor, if one exists.
  * @param node the node
  */
-// 唤醒后继节点
+// 唤醒后继节点 ： 1：修改节点状态 2 实际的唤醒线程
 // 从上面调用处知道，参数node是head头结点
 private void unparkSuccessor(Node node) {
-    /*
-     * If status is negative (i.e., possibly needing signal) try
-     * to clear in anticipation of signalling.  It is OK if this
-     * fails or if status is changed by waiting thread.
-     */
     int ws = node.waitStatus;
     // 如果head节点当前waitStatus<0, 将其修改为0
-    if (ws < 0)
+    if (ws < 0) //这里状态值通常是-1
         compareAndSetWaitStatus(node, ws, 0);
     /*
      * Thread to unpark is held in successor, which is normally
@@ -747,7 +742,7 @@ private void unparkSuccessor(Node node) {
     // 下面的代码就是唤醒后继节点，但是有可能后继节点取消了等待（waitStatus==1）
     // 从队尾往前找，找到waitStatus<=0的所有节点中排在最前面的
     Node s = node.next;
-    if (s == null || s.waitStatus > 0) {
+    if (s == null || s.waitStatus > 0) { //s.waitStatus > 0 线程放弃挣抢锁
         s = null;
         // 从后往前找，仔细看代码，不必担心中间有节点取消(waitStatus==1)的情况
         for (Node t = tail; t != null && t != node; t = t.prev)
@@ -767,8 +762,24 @@ private final boolean parkAndCheckInterrupt() {
     LockSupport.park(this); // 刚刚线程被挂起在这里了
     return Thread.interrupted();
 }
-// 又回到这个方法了：acquireQueued(final Node node, int arg)，这个时候，node的前驱是head了
+// 又回到这个方法了：acquireQueued(final Node node, int arg)，这个时候，node的前驱是head了，接着执行下面的代码，又去释放节点并挣抢锁。
+     if (p == head && tryAcquire(arg)) {
+                    setHead(node);
+                    p.next = null; // help GC
+                    failed = false;
+                    return interrupted;
+                }
 ```
+
+**总结**
+
+在并发环境下，加锁和解锁需要以下三个部件的协调：
+
+1. 锁状态。我们要知道锁是不是被别的线程占有了，这个就是 state 的作用，它为 0 的时候代表没有线程占有锁，可以去争抢这个锁，用 CAS 将 state 设为 1，如果 CAS 成功，说明抢到了锁，这样其他线程就抢不到了，如果锁重入的话，state进行+1 就可以，解锁就是减 1，直到 state 又变为 0，代表释放锁，所以 lock() 和 unlock() 必须要配对啊。然后唤醒等待队列中的第一个线程，让其来占有锁。
+2. 线程的阻塞和解除阻塞。AQS 中采用了 LockSupport.park(thread) 来挂起线程，用 unpark 来唤醒线程。
+3. 阻塞队列。因为争抢锁的线程可能很多，但是只能有一个线程拿到锁，其他的线程都必须等待，这个时候就需要一个 queue 来管理这些线程，AQS 用的是一个 FIFO 的队列，就是一个链表，每个 node 都持有后继节点的引用。
+
+
 
 
 
