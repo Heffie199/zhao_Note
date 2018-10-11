@@ -1448,7 +1448,152 @@ public final void await() throws InterruptedException {
     if (interruptMode != 0)
         reportInterruptAfterWait(interruptMode);
 }
+
+//将节点加入到条件队列
+// 将当前线程对应的节点入队，插入队尾
+private Node addConditionWaiter() {
+    Node t = lastWaiter;
+    // 如果条件队列的最后一个节点取消了，将其清除出去
+    if (t != null && t.waitStatus != Node.CONDITION) {
+        // 这个方法会遍历整个条件队列，然后会将已取消的所有节点清除出队列
+        unlinkCancelledWaiters();
+        t = lastWaiter;
+    }
+    Node node = new Node(Thread.currentThread(), Node.CONDITION);
+    // 如果队列为空
+    if (t == null)
+        firstWaiter = node;
+    else
+        t.nextWaiter = node;
+    lastWaiter = node;
+    return node;
+}
+//unlinkCancelledWaiters() 方法，该方法用于清除队列中已经取消等待的节点
+//当 await 的时候如果发生了取消操作，或者是在节点入队的时候，发现最后一个节点是被取消的，会调用一次这个方法。
+// 等待队列是一个单向链表，遍历链表将已经取消等待的节点清除出去
+// 纯属链表操作，很好理解，看不懂多看几遍就可以了
+private void unlinkCancelledWaiters() {
+    Node t = firstWaiter;
+    Node trail = null; //追踪节点
+    while (t != null) {
+        Node next = t.nextWaiter;
+        // 如果节点的状态不是 Node.CONDITION 的话，这个节点就是被取消的
+        if (t.waitStatus != Node.CONDITION) {
+            //这里t是需要被移除的节点
+            t.nextWaiter = null;
+            if (trail == null)
+                firstWaiter = next;
+            else
+                trail.nextWaiter = next;
+            if (next == null)
+                lastWaiter = trail;
+        }
+        else
+            trail = t;
+        t = next;
+        
+        // 在循环中 Node next = t.nextWaiter和 t != null ， t = next;结合起来遍历队列
+    }
+}
+
+//完全释放独占锁
+
+//回到 wait 方法，节点入队了以后，会调用 int savedState = fullyRelease(node); 方法释放锁，注意，这里是完全释放独占锁，因为 ReentrantLock 是可以重入的
+
+// 首先，我们要先观察到返回值 savedState 代表 release 之前的 state 值
+// 对于最简单的操作：先 lock.lock()，然后 condition1.await()。
+//         那么 state 经过这个方法由 1 变为 0，锁释放，此方法返回 1
+//         相应的，如果 lock 重入了 n 次，savedState == n
+// 如果这个方法失败，会将节点设置为"取消"状态，并抛出异常 IllegalMonitorStateException
+final int fullyRelease(Node node) {
+    boolean failed = true;
+    try {
+        int savedState = getState();
+        // 这里使用了当前的 state 作为 release 的参数，也就是完全释放掉锁，将 state 置为 0
+        if (release(savedState)) {
+            failed = false;
+            return savedState;
+        } else {
+            throw new IllegalMonitorStateException();
+        }
+    } finally {
+        if (failed)
+            node.waitStatus = Node.CANCELLED;
+    }
+}
+//这里release（savedState） 回去调用tryRelease(arg),如果savedState是因为重入锁变成了n，那么这里的tryRelease的参数也是n，
+ public final boolean release(int arg) {
+        if (tryRelease(arg)) {
+            Node h = head;
+            if (h != null && h.waitStatus != 0)
+                unparkSuccessor(h);
+            return true;
+        }
+        return false;
+    }
+     protected final boolean tryRelease(int releases) { //这里参数是n
+            if (!isHeldExclusively())
+                throw new IllegalMonitorStateException();
+            int nextc = getState() - releases; //这里必定会变成0 savedState = getState()
+            boolean free = exclusiveCount(nextc) == 0;
+            if (free)
+                setExclusiveOwnerThread(null);
+            setState(nextc);
+            return free;
+        }
+
+//等待进入阻塞队列
+// 回到上面的代码
+int interruptMode = 0;
+while (!isOnSyncQueue(node)) {
+    // 线程挂起
+    LockSupport.park(this);
+
+    if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+        break;
+}
+//释放掉锁以后（所有阻塞在这个条件队列都要被移到阻塞队列中），接下来是这段，这边会自旋，如果发现自己还没到阻塞队列，那么挂起，等待被转移到阻塞队列
+
+//isOnSyncQueue(Node node) 用于判断节点是否已经转移到阻塞队列了：
+// 在节点被移入到条件队列的时候，初始化时设置了 waitStatus = Node.CONDITION
+// 前面我提到，signal 的时候需要将节点从条件队列移到阻塞队列，
+// 这个方法就是判断 node 是否已经移动到阻塞队列了
+final boolean isOnSyncQueue(Node node) {
+    // 移动过去的时候，node 的 waitStatus 会置为 0，这个之后在说 signal 方法的时候会说到
+    // 如果 waitStatus 还是 Node.CONDITION，也就是 -2，那肯定就是还在条件队列中
+    // 如果 node 的前驱 prev 指向还是 null，说明肯定没有在 阻塞队列
+    if (node.waitStatus == Node.CONDITION || node.prev == null)
+        return false;
+    // 如果 node 已经有后继节点 next 的时候，那肯定是在阻塞队列了，因为条件队列中的节点在初始化的时候next是null，他们是用nextWaiter来连接链表的
+    if (node.next != null) 
+        return true;
+
+    // 这个方法从阻塞队列的队尾开始从后往前遍历找，如果找到相等的，说明在阻塞队列，否则就是不在阻塞队列
+
+    // 可以通过判断 node.prev() != null 来推断出 node 在阻塞队列吗？答案是：不能。
+    // 这个可以看AQS 的入队方法，首先设置的是 node.prev 指向 tail，
+    // 然后是 CAS 操作将自己设置为新的 tail，可是这次的 CAS 是可能失败的。
+
+    // 调用这个方法的时候，往往我们需要的就在队尾的部分，所以一般都不需要完全遍历整个队列的
+    return findNodeFromTail(node);
+}
+
+// 从同步队列的队尾往前遍历，如果找到，返回 true
+private boolean findNodeFromTail(Node node) {
+    Node t = tail;
+    for (;;) {
+        if (t == node)
+            return true;
+        if (t == null) //第一次是不会走这里的
+            return false;
+        t = t.prev;
+    }
+}
+
+//回到前面的循环，isOnSyncQueue(node) 返回 false 的话，那么进到 LockSupport.park(this); 这里线程挂起
 ~~~
+
+
 
 相比较synchronize的wait()和notify()/notifAll()的机制而言，Condition具有更高的灵活性，这个很关键。Conditon可以实现多路通知和选择性通知。当使用notify()/notifAll()时，JVM时随机通知线程的，具有很大的不可控性，所以建议使用Condition。Condition使用起来也非常方便，只需要注册到ReentrantLock下面即可。
 
