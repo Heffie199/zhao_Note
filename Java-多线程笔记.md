@@ -2406,6 +2406,7 @@ class Worker implements Runnable {
     void doWork() { ...}
 }
 
+CountDownLatch 无需和ReentrantLock结合使用。
 ~~~
 
 ![5](https://javadoop.com/blogimages/AbstractQueuedSynchronizer-3/5.png)
@@ -2440,9 +2441,7 @@ countDown() 方法每次调用都会将 state 减 1，直到 state 的值为 0�
 public class CountDownLatchDemo {
 
     public static void main(String[] args) {
-
         CountDownLatch latch = new CountDownLatch(2);
-
         Thread t1 = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -2522,13 +2521,12 @@ public void await() throws InterruptedException {
 }
 public final void acquireSharedInterruptibly(int arg)
         throws InterruptedException {
-    // 这也是老套路了，我在第二篇的中断那一节说过了
     if (Thread.interrupted())
         throw new InterruptedException();
     // t3 和 t4 调用 await 的时候，state 都大于 0。
     // 也就是说，这个 if 返回 true，然后往里看
-    if (tryAcquireShared(arg) < 0)
-        doAcquireSharedInterruptibly(arg);
+    if (tryAcquireShared(arg) < 0)  
+        doAcquireSharedInterruptibly(arg); //t3,t4调用await时，返回的是-1，才能执行这个方法。
 }
 // 只有当 state == 0 的时候，这个方法才会返回 1
 protected int tryAcquireShared(int acquires) {
@@ -2550,7 +2548,7 @@ private void doAcquireSharedInterruptibly(int arg)
             if (p == head) {
                 // 同上，只要 state 不等于 0，那么这个方法返回 -1
                 int r = tryAcquireShared(arg);
-                if (r >= 0) {
+                if (r >= 0) { //这里表示state=0
                     setHeadAndPropagate(node, r);
                     p.next = null; // help GC
                     failed = false;
@@ -2589,7 +2587,7 @@ private void doAcquireSharedInterruptibly(int arg)
 
 ![1](https://javadoop.com/blogimages/AbstractQueuedSynchronizer-3/1.png)
 
-当然，我们的例子中，其实没有 10 个线程，只有 2 个线程 t1 和 t2，只是为了让图好看些罢了。
+当然，我们的例子中，其实没有 10 个线程，只有 2 个线程 t1 和 t2。
 
 我们再一步步看具体的流程。首先，我们看 countDown() 方法:
 
@@ -2624,7 +2622,6 @@ countDown 方法就是每次调用都将 state 值减 1，如果 state 减到 0 
 
 ```java
 // 调用这个方法的时候，state == 0
-// 这个方法先不要看所有的代码，按照思路往下到我写注释的地方，其他的之后还会仔细分析
 private void doReleaseShared() {
     for (;;) {
         Node h = head;
@@ -2633,7 +2630,7 @@ private void doReleaseShared() {
             // t3 入队的时候，已经将头节点的 waitStatus 设置为 Node.SIGNAL（-1） 了
             if (ws == Node.SIGNAL) {
                 if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))
-                    continue;            // loop to recheck cases
+                    continue;            // CAS失败才会执行continue
                 // 就是这里，唤醒 head 的后继节点，也就是阻塞队列中的第一个节点
                 // 在这里，也就是唤醒 t3
                 unparkSuccessor(h);
@@ -2682,7 +2679,7 @@ private void doAcquireSharedInterruptibly(int arg)
 接下来，t3 会进到 setHeadAndPropagate(node, r) 这个方法，先把 head 给占了，然后唤醒队列中其他的线程：
 
 ```java
-private void setHeadAndPropagate(Node node, int propagate) {
+private void setHeadAndPropagate(Node node, int propagate) { //这里propagate是1
     Node h = head; // Record old head for check below
     setHead(node);
 
@@ -2693,7 +2690,7 @@ private void setHeadAndPropagate(Node node, int propagate) {
         Node s = node.next;
         if (s == null || s.isShared())
             // 又是这个方法，只是现在的 head 已经不是原来的空节点了，是 t3 的节点了
-            doReleaseShared();
+            doReleaseShared();  //使用这个个方法递归调用来唤醒阻塞队列中的后继节点
     }
 }
 ```
@@ -2705,10 +2702,8 @@ private void setHeadAndPropagate(Node node, int propagate) {
 private void doReleaseShared() {
     for (;;) {
         Node h = head;
-        // 1. h == null: 说明阻塞队列为空
+        // 1. h == null: 说明阻塞队列为空---》3
         // 2. h == tail: 说明头结点可能是刚刚初始化的头节点，
-        //   或者是普通线程节点，但是此节点既然是头节点了，那么代表已经被唤醒了，阻塞队列没有其他节点了
-        // 所以这两种情况不需要进行唤醒后继节点
         if (h != null && h != tail) {
             int ws = h.waitStatus;
             // t4 将头节点(此时是 t3)的 waitStatus 设置为 Node.SIGNAL（-1） 了
@@ -2724,7 +2719,8 @@ private void doReleaseShared() {
                      // 这个 CAS 失败的场景是：执行到这里的时候，刚好有一个节点入队，入队会将这个 ws 设置为 -1
                      !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))
                 continue;                // loop on failed CAS
-        }
+        } //----3
+        
         // 如果到这里的时候，前面唤醒的线程已经占领了 head，那么再循环
         // 否则，就是 head 没变，那么退出循环，
         // 退出循环是不是意味着阻塞队列中的其他节点就不唤醒了？当然不是，唤醒的线程之后还是会调用这个方法的
@@ -2732,7 +2728,6 @@ private void doReleaseShared() {
             break;
     }
 }
-```
 
 我们分析下最后一个 if 语句，然后才能解释第一个 CAS 为什么可能会失败：
 
@@ -2744,6 +2739,10 @@ private void doReleaseShared() {
 因为当前进行 for 循环的线程到这里的时候，可能刚刚唤醒的线程 t4 也刚刚好到这里了，那么就有可能 CAS 失败了。
 
 for 循环第一轮的时候会唤醒 t4，t4 醒后会将自己设置为头节点，如果在 t4 设置头节点后，for 循环才跑到 if (h == head)，那么此时会返回 false，for 循环会进入下一轮。t4 唤醒后也会进入到这个方法里面，那么 for 循环第二轮和 t4 就有可能在这个 CAS 相遇，那么就只会有一个成功了。
+
+```
+
+
 
 ## 7.CyclicBarrier（循环栅栏）
 
