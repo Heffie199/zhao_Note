@@ -1094,6 +1094,122 @@ private void unparkSuccessor(Node node) { //此处的节点是头结点， 头�
 
 ~~~
 
+#### AQS独占锁的取消排队
+
+怎么取消对锁的竞争？
+
+最重要的方法是这个，我们要在这里面找答案：
+
+```java
+final boolean acquireQueued(final Node node, int arg) {
+    boolean failed = true;
+    try {
+        boolean interrupted = false;
+        for (;;) {
+            final Node p = node.predecessor();
+            if (p == head && tryAcquire(arg)) {
+                setHead(node);
+                p.next = null; // help GC
+                failed = false;
+                return interrupted;
+            }
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                parkAndCheckInterrupt())
+                interrupted = true;
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+
+首先，到这个方法的时候，节点一定是入队成功的。
+
+我把 parkAndCheckInterrupt() 代码贴过来：
+
+```java
+private final boolean parkAndCheckInterrupt() {
+    LockSupport.park(this);
+    return Thread.interrupted();
+}
+```
+
+这两段代码联系起来看，是不是就清楚了。
+
+如果我们要取消一个线程的排队，我们需要在另外一个线程中对其进行中断。比如某线程调用 lock() 老久不返回，我想中断它。一旦对其进行中断，此线程会从 `LockSupport.park(this);` 中唤醒，然后 `Thread.interrupted();` 返回 true。
+
+我们发现一个问题，即使是中断唤醒了这个线程，也就只是设置了 `interrupted = true` 然后继续下一次循环。而且，由于 `Thread.interrupted();` 会清除中断状态，第二次进 parkAndCheckInterrupt 的时候，返回会是 false。
+
+所以，我们要看到，在这个方法中，interrupted 只是用来记录是否发生了中断，然后用于方法返回值，其他没有做任何相关事情。
+
+所以，我们看外层方法怎么处理 acquireQueued 返回 false 的情况。
+
+```java
+public final void acquire(int arg) {
+    if (!tryAcquire(arg) &&
+        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+        selfInterrupt();
+}
+static void selfInterrupt() {
+    Thread.currentThread().interrupt();
+}
+```
+
+所以说，lock() 方法处理中断的方法就是，你中断归中断，我抢锁还是照样抢锁，几乎没关系，只是我抢到锁了以后，设置线程的中断状态而已，也不抛出任何异常出来。调用者获取锁后，可以去检查是否发生过中断，也可以不理会。
+
+我们来看 ReentrantLock 的另一个 lock 方法：
+
+```java
+public void lockInterruptibly() throws InterruptedException {
+    sync.acquireInterruptibly(1);
+}
+```
+
+方法上多了个 `throws InterruptedException` 。
+
+```java
+public final void acquireInterruptibly(int arg)
+        throws InterruptedException {
+    if (Thread.interrupted())
+        throw new InterruptedException();
+    if (!tryAcquire(arg))
+        doAcquireInterruptibly(arg);
+}
+```
+
+继续往里：
+
+```java
+private void doAcquireInterruptibly(int arg) throws InterruptedException {
+    final Node node = addWaiter(Node.EXCLUSIVE);
+    boolean failed = true;
+    try {
+        for (;;) {
+            final Node p = node.predecessor();
+            if (p == head && tryAcquire(arg)) {
+                setHead(node);
+                p.next = null; // help GC
+                failed = false;
+                return;
+            }
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                parkAndCheckInterrupt())
+                // 就是这里了，一旦异常，马上结束这个方法，抛出异常。
+                // 这里不再只是标记这个方法的返回值代表中断状态
+                // 而是直接抛出异常，而且外层也不捕获，一直往外抛到 lockInterruptibly
+                throw new InterruptedException();
+        }
+    } finally {
+        // 如果通过 InterruptedException 异常出去，那么 failed 就是 true 了
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+
+
+
 ### 深入浅出AQS之共享锁模式
 
 **执行过程**
