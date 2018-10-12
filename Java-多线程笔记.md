@@ -2020,6 +2020,180 @@ public class MyService {
 
 ## 3.semaphore (信号量)
 
+Semaphore 是什么呢？它类似一个资源池（可以类比线程池），每个线程需要调用 acquire() 方法获取资源，然后才能执行，执行完后，需要 release 资源，让给其他的线程用。Semaphore 其实也是 AQS 中共享锁的使用，因为所有线程共享一个池。
+
+套路解读：创建 Semaphore 实例的时候，需要一个参数 permits，这个基本上可以确定是设置给 AQS 的 state 的，然后每个线程调用 acquire 的时候，执行 state = state - 1，release 的时候执行 state = state + 1，当然，acquire 的时候，如果 state = 0，说明没有资源了，需要等待其他线程 release。
+
+构造方法：
+
+```java
+public Semaphore(int permits) {
+    sync = new NonfairSync(permits);
+}
+
+public Semaphore(int permits, boolean fair) {
+    sync = fair ? new FairSync(permits) : new NonfairSync(permits);
+}
+```
+
+这里和 ReentrantLock 类似，用了公平策略和非公平策略。
+
+看 acquire 方法：
+
+```java
+public void acquire() throws InterruptedException {
+    sync.acquireSharedInterruptibly(1);
+}
+public void acquireUninterruptibly() {
+    sync.acquireShared(1);
+}
+public void acquire(int permits) throws InterruptedException {
+    if (permits < 0) throw new IllegalArgumentException();
+    sync.acquireSharedInterruptibly(permits);
+}
+public void acquireUninterruptibly(int permits) {
+    if (permits < 0) throw new IllegalArgumentException();
+    sync.acquireShared(permits);
+}
+```
+
+看不抛出 InterruptedException 异常的 acquireUninterruptibly() 方法吧：
+
+```java
+public void acquireUninterruptibly() {
+    sync.acquireShared(1);
+}
+public final void acquireShared(int arg) {
+    if (tryAcquireShared(arg) < 0)
+        doAcquireShared(arg);
+}
+```
+
+Semaphore 分公平策略和非公平策略，我们对比一下两个 tryAcquireShared 方法：
+
+```java
+// 公平策略：
+protected int tryAcquireShared(int acquires) {
+    for (;;) {
+        // 区别就在于是不是会先判断是否有线程在排队，然后才进行 CAS 减操作
+        if (hasQueuedPredecessors())
+            return -1;
+        int available = getState();
+        int remaining = available - acquires;
+        if (remaining < 0 ||
+            compareAndSetState(available, remaining))
+            return remaining;
+    }
+}
+// 非公平策略：
+protected int tryAcquireShared(int acquires) {
+    return nonfairTryAcquireShared(acquires);
+}
+final int nonfairTryAcquireShared(int acquires) {
+    for (;;) {
+        int available = getState();
+        int remaining = available - acquires;
+        if (remaining < 0 ||
+            compareAndSetState(available, remaining))
+            return remaining;
+    }
+}
+```
+
+再回到 acquireShared 方法，
+
+```java
+public final void acquireShared(int arg) {
+    if (tryAcquireShared(arg) < 0)
+        doAcquireShared(arg);
+}
+```
+
+由于 tryAcquireShared(arg) 返回小于 0 的时候，说明 state 已经小于 0 了（没资源了），此时 acquire 不能立马拿到资源，需要进入到阻塞队列等待：
+
+```java
+private void doAcquireShared(int arg) {
+    final Node node = addWaiter(Node.SHARED);
+    boolean failed = true;
+    try {
+        boolean interrupted = false;
+        for (;;) {
+            final Node p = node.predecessor();
+            if (p == head) {
+                int r = tryAcquireShared(arg);
+                if (r >= 0) {
+                    setHeadAndPropagate(node, r);
+                    p.next = null; // help GC
+                    if (interrupted)
+                        selfInterrupt();
+                    failed = false;
+                    return;
+                }
+            }
+            if (shouldParkAfterFailedAcquire(p, node) &&
+                parkAndCheckInterrupt())
+                interrupted = true;
+        }
+    } finally {
+        if (failed)
+            cancelAcquire(node);
+    }
+}
+```
+
+线程挂起后等待有资源被 release 出来。接下来，我们就要看 release 的方法了：
+
+```java
+// 任务介绍，释放一个资源
+public void release() {
+    sync.releaseShared(1);
+}
+public final boolean releaseShared(int arg) {
+    if (tryReleaseShared(arg)) {
+        doReleaseShared();
+        return true;
+    }
+    return false;
+}
+
+protected final boolean tryReleaseShared(int releases) {
+    for (;;) {
+        int current = getState();
+        int next = current + releases;
+        // 溢出，当然，我们一般也不会用这么大的数
+        if (next < current) // overflow
+            throw new Error("Maximum permit count exceeded");
+        if (compareAndSetState(current, next))
+            return true;
+    }
+}
+```
+
+tryReleaseShared 方法总是会返回 true，然后是 doReleaseShared，这个方法用于唤醒所有的等待线程：
+
+```java
+private void doReleaseShared() {
+    for (;;) {
+        Node h = head;
+        if (h != null && h != tail) {
+            int ws = h.waitStatus;
+            if (ws == Node.SIGNAL) {
+                if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))
+                    continue;            // loop to recheck cases
+                unparkSuccessor(h);
+            }
+            else if (ws == 0 &&
+                     !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))
+                continue;                // loop on failed CAS
+        }
+        if (h == head)                   // loop if head changed
+            break;
+    }
+}
+```
+
+
+
 Semaphore也叫信号量，在JDK1.5被引入，可以**用来控制同时访问特定资源的线程数量**，通过协调各个线程，以保证合理的使用资源。
 
 Semaphore内部维护了一组虚拟的许可，许可的数量可以通过构造函数的参数指定
@@ -2838,7 +3012,7 @@ public int await() throws InterruptedException, BrokenBarrierException {
         throw new Error(toe); // cannot happen
     }
 }
-// 带超时机制，如果超时抛出                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         TimeoutException 异常
+// 带超时机制，如果超时抛出TimeoutException 异常
 public int await(long timeout, TimeUnit unit)
     throws InterruptedException,
            BrokenBarrierException,
@@ -2851,11 +3025,10 @@ public int await(long timeout, TimeUnit unit)
 
 ```java
 private int dowait(boolean timed, long nanos)
-        throws InterruptedException, BrokenBarrierException,
-               TimeoutException {
+        throws InterruptedException, BrokenBarrierException,TimeoutException {
     final ReentrantLock lock = this.lock;
     // 先要获取到锁，然后在 finally 中要记得释放锁
-    // 如果记得 Condition 部分的话，我们知道 condition 的 await 会释放锁，signal 的时候需要重新获取锁
+    //Condition 部分的话，我们知道 condition 的 await 会释放锁，signal 的时候需要重新获取锁
     lock.lock();
     try {
         final Generation g = generation;
@@ -2893,7 +3066,7 @@ private int dowait(boolean timed, long nanos)
         }
 
         // loop until tripped, broken, interrupted, or timed out
-        // 如果是最后一个线程调用 await，那么上面就返回了
+        // 如果是最后一个线程调用 await，那么上面就返回了，否则之执行下面的代码
         // 下面的操作是给那些不是最后一个到达栅栏的线程执行的
         for (;;) {
             try {
@@ -2943,11 +3116,7 @@ private int dowait(boolean timed, long nanos)
 }
 ```
 
-好了，我想我应该讲清楚了吧，我好像几乎没有漏掉任何一行代码吧？
-
-下面开始收尾工作。
-
-首先，我们看看怎么得到有多少个线程到了栅栏上，处于等待状态：
+看看怎么得到有多少个线程到了栅栏上，处于等待状态：
 
 ```java
 public int getNumberWaiting() {
@@ -3000,7 +3169,9 @@ public void reset() {
 
 首先，打破栅栏，那意味着所有等待的线程（3个等待的线程）会唤醒，await 方法会通过抛出 BrokenBarrierException 异常返回。然后开启新的一代，重置了 count 和 generation，相当于一切归零了。
 
-怎么样，CyclicBarrier 源码很简单吧。
+------
+
+
 
 CyclicBarrier也叫同步屏障，在JDK1.5被引入，可以让一组线程达到一个屏障时被阻塞，直到最后一个线程达到屏障时，所以被阻塞的线程才能继续执行。(相当于为一组线程设置一排栅栏，直到所有线程都到了来开放栅栏通道)、
 
@@ -3226,6 +3397,8 @@ ConcurrentHashMap中主要实体类就是三个：ConcurrentHashMap（整个Hash
 
 
 ## 2 BlockingQueue
+
+
 
   在新增的Concurrent包中，BlockingQueue很好的解决了多线程中，如何高效安全“传输”数据的问题.通过这些高效并且线程安全的队列类，为我们快速搭建高质量的多线程程序带来极大的便利。
 
