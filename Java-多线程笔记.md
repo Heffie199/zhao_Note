@@ -3452,7 +3452,9 @@ BlockingQueue 的实现都是**线程安全**的，但是批量的集合操作�
 
 ###  ArrayBlockingQueue
 
- ArrayBlockingQueue 是 BlockingQueue 接口的有界队列实现类，底层采用数组来实现。
+ ArrayBlockingQueue 是 BlockingQueue 接口的有界队列实现类，底层采用数组来实现。、
+
+其并发控制采用可重入锁来控制，不管是插入操作还是读取操作，都需要获取到锁才能进行操作。
 
 它采用一个 ReentrantLock 和相应的两个 Condition 来实现。
 
@@ -3476,7 +3478,11 @@ private final Condition notFull;
 
 ![array-blocking-queue](https://javadoop.com/blogimages/java-concurrent-queue/array-blocking-queue.png)
 
-ArrayBlockingQueue 实现并发同步的原理就是，读操作和写操作都需要获取到 AQS 独占锁才能进行操作。如果队列为空，这个时候读操作的线程进入到**读线程队列**排队，等待写线程写入新的元素，然后唤醒读线程队列的第一个等待线程。如果队列已满，这个时候写操作的线程进入到**写线程队列**排队，等待读线程将队列元素移除腾出空间，然后唤醒写线程队列的第一个等待线程。
+ArrayBlockingQueue 实现并发同步的原理就是，读操作和写操作都需要获取到 AQS 独占锁才能进行操作(这样才能保证并发的安全性)。
+
+如果队列为空，这个时候读操作的线程进入到**读线程队列***==排队==*，等待写线程写入新的元素，然后唤醒读线程队列的第一个等待线程。
+
+如果队列已满，这个时候写操作的线程进入到**写线程队列**==排队==，等待读线程将队列元素移除腾出空间，然后唤醒写线程队列的第一个等待线程。
 
 对于 ArrayBlockingQueue，我们可以在构造的时候指定以下三个参数：
 
@@ -3496,7 +3502,7 @@ public LinkedBlockingQueue() {
 // 传说中的有界队列
 public LinkedBlockingQueue(int capacity) {
     if (capacity <= 0) throw new IllegalArgumentException();
-    this.capacity = capacity;
+    this.capacity = capacity; //capacity意思是容量
     last = head = new Node<E>(null);
 }
 ```
@@ -3506,13 +3512,10 @@ public LinkedBlockingQueue(int capacity) {
 ~~~java
 // 队列容量
 private final int capacity;
-
 // 队列中的元素数量
 private final AtomicInteger count = new AtomicInteger(0);
-
 // 队头
 private transient Node<E> head;
-
 // 队尾
 private transient Node<E> last;
 
