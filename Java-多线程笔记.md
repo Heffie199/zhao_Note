@@ -3519,7 +3519,7 @@ private transient Node<E> head;
 // 队尾
 private transient Node<E> last;
 
-// take, poll, peek 等读操作的方法需要获取到这个锁
+// take, poll(take,poll 移除), peek 等读操作的方法需要获取到这个锁
 private final ReentrantLock takeLock = new ReentrantLock();
 
 // 如果读操作的时候队列是空的，那么等待 notEmpty 条件
@@ -3556,7 +3556,7 @@ put 方法是怎么将元素插入到队尾的：
 ```java
 public void put(E e) throws InterruptedException {
     if (e == null) throw new NullPointerException();
-    // 如果你纠结这里为什么是 -1，可以看看 offer 方法。这就是个标识成功、失败的标志而已。
+    // 这里为什么是 -1，可以看看 offer 方法。这就是个标识成功、失败的标志而已。
     int c = -1;
     Node<E> node = new Node(e);
     final ReentrantLock putLock = this.putLock;
@@ -3605,7 +3605,7 @@ private void signalNotEmpty() {
 }
 ```
 
-我们再看看 take 方法：
+我们再看看 take (从队列中读出一个元素)方法：
 
 ```java
 public E take() throws InterruptedException {
@@ -3663,9 +3663,239 @@ private void signalNotFull() {
 }
 ```
 
+##  3 SynchronousQueue
+
+它是一个特殊的队列，它的名字其实就蕴含了它的特征 - - 同步的队列。为什么说是同步的呢？这里说的并不是多线程的并发问题，而是因为当一个线程往队列中写入一个元素时，写入操作不会立即返回，需要等待另一个线程来将这个元素拿走；同理，当一个读线程做读操作的时候，同样需要一个相匹配的写线程的写操作。这里的 Synchronous 指的就是读线程和写线程需要同步，一个读线程匹配一个写线程。
+
+较少使用到 SynchronousQueue 这个类，不过它在线程池的实现类 ScheduledThreadPoolExecutor 中得到了应用。
+
+SynchronousQueue 的队列其实是虚的，其不提供任何空间（一个都没有）来存储元素。数据必须从某个写线程交给某个读线程，而不是写到某个队列中等待被消费。
+
+```java
+// 构造时，我们可以指定公平模式还是非公平模式，区别之后再说
+public SynchronousQueue(boolean fair) {
+    transferer = fair ? new TransferQueue() : new TransferStack();
+}
+abstract static class Transferer {
+    // 从方法名上大概就知道，这个方法用于转移元素，从生产者手上转到消费者手上
+    // 也可以被动地，消费者调用这个方法来从生产者手上取元素
+    // 第一个参数 e 如果不是 null，代表场景为：将元素从生产者转移给消费者
+    // 如果是 null，代表消费者等待生产者提供元素，然后返回值就是相应的生产者提供的元素
+    // 第二个参数代表是否设置超时，如果设置超时，超时时间是第三个参数的值
+    // 返回值如果是 null，代表超时，或者中断。具体是哪个，可以通过检测中断状态得到。
+    abstract Object transfer(Object e, boolean timed, long nanos);
+}
+```
+
+Transferer 有两个内部实现类，是因为构造 SynchronousQueue 的时候，我们可以指定公平策略。公平模式意味着，所有的读写线程都遵守先来后到，FIFO 嘛，对应 TransferQueue。而非公平模式则对应 TransferStack。
+
+```java
+// 构造时，我们可以指定公平模式还是非公平模式，区别之后再说
+public SynchronousQueue(boolean fair) {
+    transferer = fair ? new TransferQueue() : new TransferStack();
+}
+abstract static class Transferer {
+    // 从方法名上大概就知道，这个方法用于转移元素，从生产者手上转到消费者手上
+    // 也可以被动地，消费者调用这个方法来从生产者手上取元素
+    // 第一个参数 e 如果不是 null，代表场景为：将元素从生产者转移给消费者
+    // 如果是 null，代表消费者等待生产者提供元素，然后返回值就是相应的生产者提供的元素
+    // 第二个参数代表是否设置超时，如果设置超时，超时时间是第三个参数的值
+    // 返回值如果是 null，代表超时，或者中断。具体是哪个，可以通过检测中断状态得到。
+    abstract Object transfer(Object e, boolean timed, long nanos);
+}
+```
+
+Transferer 有两个内部实现类，是因为构造 SynchronousQueue 的时候，我们可以指定公平策略。公平模式意味着，所有的读写线程都遵守先来后到，FIFO 嘛，对应 TransferQueue。而非公平模式则对应 TransferStack。
+
+![synchronous-queue](https://javadoop.com/blogimages/java-concurrent-queue/synchronous-queue.png)
+
+ 公平模式分析源码
+
+看看 put 方法和 take 方法：
+
+```java
+// 写入值
+public void put(E o) throws InterruptedException {
+    if (o == null) throw new NullPointerException();
+    if (transferer.transfer(o, false, 0) == null) { // 1
+        Thread.interrupted();
+        throw new InterruptedException();
+    }
+}
+// 读取值并移除
+public E take() throws InterruptedException {
+    Object e = transferer.transfer(null, false, 0); // 2
+    if (e != null)
+        return (E)e;
+    Thread.interrupted();
+    throw new InterruptedException();
+}
+写操作 put(E o) 和读操作 take() 都是调用 Transferer.transfer(…) 方法，区别在于第一个参数是否为 null 值。
+
+transfer 的设计思路，其基本算法如下：
+
+1. 当调用这个方法时，如果队列是空的，或者队列中的节点和当前的线程操作类型一致（如当前操作是 put 操作，而队列中的元素也都是写线程）。将当前线程加入到等待队列即可。
+2. 如果队列中有等待节点，而且与当前操作可以匹配（如队列中都是读操作线程，当前线程是写操作线程，反之亦然）。这种情况下，匹配等待队列的队头，出队，返回相应数据。
+
+其实这里有个隐含的条件被满足了，队列如果不为空，肯定都是同种类型的节点，要么都是读操作，要么都是写操作。
+```
+
+我们可以假设出一个男女配对的场景：一个男的过来，如果一个人都没有，那么他需要等待；如果发现有一堆男的在等待，那么他需要排到队列后面；如果发现是一堆女的在排队，那么他直接牵走队头的那个女的。
+
+既然这里说到了等待队列，我们先看看其实现，也就是 QNode:
+
+```java
+static final class QNode {
+    volatile QNode next;          // 可以看出来，等待队列是单向链表
+    volatile Object item;         // CAS'ed to or from null ，节点中操作的对象
+    volatile Thread waiter;       // 将线程对象保存在这里，用于挂起和唤醒
+    final boolean isData;         // 用于判断是写线程节点(isData == true)，还是读线程节点
+
+    QNode(Object item, boolean isData) {
+        this.item = item;
+        this.isData = isData;
+    }
+  ......
+```
 
 
-## 3 ConcurrentLinkQueue
+
+```java
+/**
+ * Puts or takes an item.
+ */
+Object transfer(Object e, boolean timed, long nanos) {
+
+    QNode s = null; // constructed(构造)/reused as needed
+    boolean isData = (e != null); // isData=true表示是写线程，反之是读线程
+
+    for (;;) {
+        QNode t = tail;
+        QNode h = head;
+        if (t == null || h == null)         // saw uninitialized value
+            continue;                       // spin
+
+        // 队列空，或队列中节点类型和当前节点一致，
+        // 即我们说的第一种情况，将节点入队即可。读者要想着这块 if 里面方法其实就是入队
+        if (h == t || t.isData == isData) { // empty or same-mode
+            QNode tn = t.next;
+            // t != tail 说明刚刚有节点入队，continue 即可
+            if (t != tail)                  // inconsistent read
+                continue;
+            // 有其他节点入队，但是 tail 还是指向原来的，此时设置 tail 即可
+            if (tn != null) {               // lagging tail
+                // 这个方法就是：如果 tail 此时为 t 的话，设置为 tn
+                advanceTail(t, tn);
+                continue;
+            }
+            // 
+            if (timed && nanos <= 0)        // can't wait
+                return null;
+            if (s == null)
+                s = new QNode(e, isData);
+            // 将当前节点，插入到 tail 的后面
+            if (!t.casNext(null, s))        // failed to link in
+                continue;
+
+            // 将当前节点设置为新的 tail
+            advanceTail(t, s);              // swing tail and wait
+            // 看到这里，请读者先往下滑到这个方法，看完了以后再回来这里，思路也就不会断了
+            Object x = awaitFulfill(s, e, timed, nanos);
+            // 到这里，说明之前入队的线程被唤醒了，准备往下执行
+            if (x == s) {                   // wait was cancelled
+                clean(t, s);
+                return null;
+            }
+
+            if (!s.isOffList()) {           // not already unlinked
+                advanceHead(t, s);          // unlink if head
+                if (x != null)              // and forget fields
+                    s.item = s;
+                s.waiter = null;
+            }
+            return (x != null) ? x : e;
+
+        // 这里的 else 分支就是上面说的第二种情况，有相应的读或写相匹配的情况
+        } else {                            // complementary-mode
+            QNode m = h.next;               // node to fulfill
+            if (t != tail || m == null || h != head)
+                continue;                   // inconsistent read
+
+            Object x = m.item;
+            if (isData == (x != null) ||    // m already fulfilled
+                x == m ||                   // m cancelled
+                !m.casItem(x, e)) {         // lost CAS
+                advanceHead(h, m);          // dequeue and retry
+                continue;
+            }
+
+            advanceHead(h, m);              // successfully fulfilled
+            LockSupport.unpark(m.waiter);
+            return (x != null) ? x : e;
+        }
+    }
+}
+
+void advanceTail(QNode t, QNode nt) {
+    if (tail == t)
+        UNSAFE.compareAndSwapObject(this, tailOffset, t, nt);
+}
+// 自旋或阻塞，直到满足条件，这个方法返回
+Object awaitFulfill(QNode s, Object e, boolean timed, long nanos) {
+
+    long lastTime = timed ? System.nanoTime() : 0;
+    Thread w = Thread.currentThread();
+    // 判断需要自旋的次数，
+    int spins = ((head.next == s) ?
+                 (timed ? maxTimedSpins : maxUntimedSpins) : 0);
+    for (;;) {
+        // 如果被中断了，那么取消这个节点
+        if (w.isInterrupted())
+            // 就是将当前节点 s 中的 item 属性设置为 this
+            s.tryCancel(e);
+        Object x = s.item;
+        // 这里是这个方法的唯一的出口
+        if (x != e)
+            return x;
+        // 如果需要，检测是否超时
+        if (timed) {
+            long now = System.nanoTime();
+            nanos -= now - lastTime;
+            lastTime = now;
+            if (nanos <= 0) {
+                s.tryCancel(e);
+                continue;
+            }
+        }
+        if (spins > 0)
+            --spins;
+        // 如果自旋达到了最大的次数，那么检测
+        else if (s.waiter == null)
+            s.waiter = w;
+        // 如果自旋到了最大的次数，那么线程挂起，等待唤醒
+        else if (!timed)
+            LockSupport.park(this);
+        // spinForTimeoutThreshold 这个之前讲 AQS 的时候其实也说过，剩余时间小于这个阈值的时候，就
+        // 不要进行挂起了，自旋的性能会比较好
+        else if (nanos > spinForTimeoutThreshold)
+            LockSupport.parkNanos(this, nanos);
+    }
+}
+```
+
+Doug Lea 的巧妙之处在于，将各个代码凑在了一起，使得代码非常简洁，当然也同时增加了我们的阅读负担，看代码的时候，还是得仔细想想各种可能的情况。
+
+下面，再说说前面说的公平模式和非公平模式的区别。
+
+相信大家心里面已经有了公平模式的工作流程的概念了，我就简单说说 TransferStack 的算法，就不分析源码了。
+
+1. 当调用这个方法时，如果队列是空的，或者队列中的节点和当前的线程操作类型一致（如当前操作是 put 操作，而栈中的元素也都是写线程）。这种情况下，将当前线程加入到等待栈中，等待配对。然后返回相应的元素，或者如果被取消了的话，返回 null。
+2. 如果栈中有等待节点，而且与当前操作可以匹配（如栈里面都是读操作线程，当前线程是写操作线程，反之亦然）。将当前节点压入栈顶，和栈中的节点进行匹配，然后将这两个节点出栈。配对和出栈的动作其实也不是必须的，因为下面的一条会执行同样的事情。
+3. 如果栈顶是进行匹配而入栈的节点，帮助其进行匹配并出栈，然后再继续操作。
+
+应该说，TransferStack 的源码要比 TransferQueue 的复杂一些，如果读者感兴
+
+## ConcurrentLinkQueue
 
 ```
 
