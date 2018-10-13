@@ -3663,7 +3663,7 @@ private void signalNotFull() {
 }
 ```
 
-##  3 SynchronousQueue
+###  SynchronousQueue
 
 它是一个特殊的队列，它的名字其实就蕴含了它的特征 - - 同步的队列。为什么说是同步的呢？这里说的并不是多线程的并发问题，而是因为当一个线程往队列中写入一个元素时，写入操作不会立即返回，需要等待另一个线程来将这个元素拿走；同理，当一个读线程做读操作的时候，同样需要一个相匹配的写线程的写操作。这里的 Synchronous 指的就是读线程和写线程需要同步，一个读线程匹配一个写线程。
 
@@ -3776,9 +3776,9 @@ Object transfer(Object e, boolean timed, long nanos) {
             continue;                       // spin
 
         // 队列空，或队列中节点类型和当前节点一致，
-        // 即我们说的第一种情况，将节点入队即可。读者要想着这块 if 里面方法其实就是入队
+        // 即我们说的第一种情况，将节点入队即可.要想着这块 if 里面方法其实就是入队
         if (h == t || t.isData == isData) { // empty or same-mode
-            QNode tn = t.next;
+             QNode tn = t.next;
             // t != tail 说明刚刚有节点入队，continue 即可
             if (t != tail)                  // inconsistent read
                 continue;
@@ -3883,9 +3883,7 @@ Object awaitFulfill(QNode s, Object e, boolean timed, long nanos) {
 }
 ```
 
-Doug Lea 的巧妙之处在于，将各个代码凑在了一起，使得代码非常简洁，当然也同时增加了我们的阅读负担，看代码的时候，还是得仔细想想各种可能的情况。
-
-下面，再说说前面说的公平模式和非公平模式的区别。
+公平模式和非公平模式的区别。
 
 相信大家心里面已经有了公平模式的工作流程的概念了，我就简单说说 TransferStack 的算法，就不分析源码了。
 
