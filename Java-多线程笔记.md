@@ -4186,9 +4186,17 @@ private static <T> void siftDownComparable(int k, T x, Object[] array,
 
 ![priority-blocking-queue-4](https://javadoop.com/blogimages/java-concurrent-queue/priority-blocking-queue-4.png)
 
+**总结**
 
+ArrayBlockingQueue 底层是数组，有界队列，如果我们要使用生产者-消费者模式，这是非常好的选择。
 
-### ConcurrentLinkQueue
+LinkedBlockingQueue 底层是链表，可以当做无界和有界队列来使用，不要以为它就是无界队列。
+
+SynchronousQueue 本身不带有空间来存储任何元素，使用上可以选择公平模式和非公平模式。
+
+PriorityBlockingQueue 是无界队列，基于数组，数据结构为二叉堆，数组第一个也是树的根节点总是最小值。
+
+## 3ConcurrentLinkQueue
 
 ```
 
