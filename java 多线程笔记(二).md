@@ -6,6 +6,8 @@
 
 ## 基本线程池
 
+![img](https://upload-images.jianshu.io/upload_images/1958298-1442fe24be61cbf2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/752/format/webp)
+
 
 
 ## 扩展和增强线程池
