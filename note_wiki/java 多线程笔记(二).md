@@ -123,9 +123,113 @@ ThreadPoolExecutor 是一个可以扩展的线程池，它提供了 beforeExecut
 
 ### 拒绝策略
 
+#### 什么是拒绝策略
+
+使用拒绝策略的原因：
+
+正常情况下，如果我们的任务不是很繁重，那么任务一提交就给执行了。但是有时候，我们的系统任务特别的繁重。已经严重影响了系统的性能了。
+
+而且我们一般不会准备一个无限大小的队列，这对于我们系统是没有好处的，因为一片的任务都进来，放在队列中会导致内存占有递增，且没有释放。 会导致内存溢出。
+
+但是有时候是会出现这种任务的疯狂提交，导致系统负载，处理不过来，最终爆掉。 这时候我们应该选择丢掉任务，
+而不是选择将任务放在内存中。并不是直接丢了，而是以一种方式记录下来，这就是我们的拒绝策略
+
+#### 什么时候需要使用拒绝策略呢？ 
+
+当任务数量超过系统实际承载能力的时候就要用到拒绝策略了，可以说它是系统超负荷运行的补救措施。简言之，就是线程用完，队列已满，无法为新任务服务，则需一套机制来合理的处理这些问题。
+
+(常见的有界队列有：ArrayBlockingQueue 基于数组实现的阻塞队列，SynchronousQueue 内部容量为零)
+
+JDK 提供了四种内置拒绝策略： 
+1、DiscardPolicy: 默默丢弃无法处理的任务，不予任何处理 
+2、DiscardOldestPolicy: 丢弃队列中最老的任务, 尝试再次提交当前任务 
+3、AbortPolicy: 直接抛异常，阻止系统正常工作。 
+
+4、CallerRunsPolicy: 将任务分给调用线 行,运行当前被丢弃的任务，这样做不会真的丢弃任务，但是提交的线程性能有可能急剧下降。
+
+通常的使用方式：
+
+~~~java
+int corePoolSize = 1;
+int maximumPoolSize = 1;
+BlockingQueue queue = new  ArrayBlockingQueue<Runnable>(1);
+ThreadPoolExecutor pool = new ThreadPoolExecutor(corePoolSize,  maximumPoolSize,0, TimeUnit.SECONDS, queue ) ;
+pool.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy ());
+pool.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
+pool.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
+pool.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+--------------
+    
+~~~
+
+有时候我们需要对改接口进行扩展，来满足特别的需求就需要自定义了
+
+~~~java
+//拒绝策略的接口实现
+public interface RejectedExecutionHandler {
+    void rejectedExecution(Runnable r, ThreadPoolExecutor executor);
+}
+~~~
+
+自定义的拒绝策略的代码示例：
+
+```java
+  ExecutorService executorService = new ThreadPoolExecutor(5, 5, 0L,
+            TimeUnit.SECONDS, 
+            new LinkedBlockingDeque<Runnable>(10),   
+            Executors.defaultThreadFactory()
+                , new RejectedExecutionHandler() {
+            @Override
+            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                //打印丢弃的任务
+                //这里的r 是被拒绝的线程
+                System.out.println(r.toString() + " is discard");
+            }
+        });
+        for (int i = 0; i < 100; i++) {
+            executorService.submit(myTask);
+            Thread.sleep(10);
+        }
+--------------------- 
+```
+
+
+
 ### 自定义ThreadFactory
 
+工厂模式是最常用的模式之一，在创建线程的时候使用工厂模式来生产Thread，这样就能替代默认的new THread，而且在自定义工厂里面，我们能创建自定义化的Thread，并且计数，或则限制创建Thread的数量，或给每个Thread设置对应的名字(以便于调试)
 
+**自定义ThreadFactory可以根治线程池究竟何时创建了多少线程，也可以自定义线程的名称、组以及优先级等信息，甚至可以任性的将线程设置为守护线程。总之，自定义ThreadFactory可以更加自由的设置线程池中所有线程的状态。**
+
+例子：工厂模式来创建自己的Thread
+
+```java
+public class MyThreadFactory implements ThreadFactory {
+private int counter;
+private String name;
+private List<String> stats;
+public MyThreadFactory(String name) {
+	counter = 0;
+	this.name = name;
+	stats = new ArrayList<String>();
+}
+@Override
+public Thread newThread(Runnable run) {
+	Thread t = new Thread(run, name + "-Thread-" + counter);
+	counter++;
+	stats.add(....);
+	return t;
+}
+public static void main(String[] args) {
+	MyThreadFactory factory = new MyThreadFactory("MyThreadFactory");
+	Task task = new Task();
+	Thread thread = null;
+	for(int i = 0; i < 10; i++) {
+		thread = factory.newThread(task);
+		thread.start();
+	}
+}
+```
 
 ## 线程池及其源码的分析
 
