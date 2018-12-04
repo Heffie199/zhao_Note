@@ -188,6 +188,8 @@ public class Singleton3 {
     // 主要是使用了 嵌套类可以访问外部类的静态属性和静态方法 的特性
     private static class Holder {
         private static Singleton3 instance = new Singleton3();
+        //当我们访问Singleton3的时候其实并没有初始化加载静态内部类Holder，
+        //只有在访问getInstance()时才会加载，变相的做了个延迟加载
     }
     public static Singleton3 getInstance() {
         return Holder.instance;
