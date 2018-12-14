@@ -111,8 +111,11 @@ com
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.1.0.RELEASE</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath /> 
 	</parent>
+   <!-- 
+   在pom.xml中引入spring-boot-start-parent,spring官方的解释叫stater poms,它可以提供dependency management,也就是说依赖管理，引入以后在申明其它dependency的时候就不需要version了
+   -->
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -148,7 +151,11 @@ com
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+        <!-- 
+           如果我们要直接Main启动spring，那么以下plugin尽量要添加
+         -->
 	</build>
+
 
 // pom.xml中分为 parent，properties，dependencies，build。 我们引入依赖需要放在dependencies中
 
@@ -179,17 +186,98 @@ pom.xml文件中默认有两个模块：
 
 ```java
 @RestController
+// @RestController返回json字符串的数据，直接可以编写RESTFul的接口；意思就是controller里面的方法都以json格式输出
+//其实Spring Boot也是引用了JSON解析包Jackson，自然我们就可以在Demo对象上使用Jackson提供的json属性的注解，对时间进行格式化，对一些字段进行忽略等等
 public class HelloWorldController {
     @RequestMapping("/hello")
     public String index() {
         return "Hello World";
     }
+}  
+```
+
+如果不想使用JackJson框架，而想使用其他的Json框架
+
+spring boot默认的json使用起来很陌生，想用自己熟悉的fastjson
+
+​    **引入fastjson依赖库：**
+
+```xml
+ <dependency>  
+          <groupId>com.alibaba</groupId>  
+          <artifactId>fastjson</artifactId>  
+          <version>1.2.15</version>  
+  </dependency>  
+```
+
+官方文档说的1.2.10以后，会有两个方法支持HttpMessageconvert，一个是FastJsonHttpMessageConverter，支持4.2以下的版本，一个是FastJsonHttpMessageConverter4支持4.2以上的版本。这里也就是说：低版本的就不支持了，所以这里最低要求就是1.2.10+。
+
+**配置fastjon**
+
+支持两种方法：
+
+第一种方法就是：
+（1）启动类继承extends WebMvcConfigurerAdapter
+（2）覆盖方法configureMessageConverters 
+
+```java
+** 
+ * 
+ * @author Angel --守护天使 
+ * @version v.0.1 
+ * @date 2016年7月29日下午7:06:11 
+ */  
+@SpringBootApplication  
+public class ApiCoreApp  extends WebMvcConfigurerAdapter {    
+    @Override  
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {  
+        super.configureMessageConverters(converters);  
+        FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();  
+        FastJsonConfig fastJsonConfig = new FastJsonConfig();  
+        fastJsonConfig.setSerializerFeatures(  
+                SerializerFeature.PrettyFormat  
+        );  
+        fastConverter.setFastJsonConfig(fastJsonConfig); 
+        converters.add(fastConverter);  
+    }  
+} 
+```
+
+第二种方法:
+
+（1）在App.java启动类中，注入Bean : HttpMessageConverters
+
+```java
+/** 
+ * 
+ * @author Angel --守护天使 
+ * @version v.0.1 
+ * @date 2016年7月29日下午7:06:11 
+ */  
+@SpringBootApplication  
+public class ApiCoreApp {   
+    @Bean  
+    public HttpMessageConverters fastJsonHttpMessageConverters() {  
+       FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();  
+       FastJsonConfig fastJsonConfig = new FastJsonConfig();  
+       fastJsonConfig.setSerializerFeatures(SerializerFeature.PrettyFormat);  
+       fastConverter.setFastJsonConfig(fastJsonConfig);  
+       HttpMessageConverter<?> converter = fastConverter;  
+       return new HttpMessageConverters(converter);  
+    }  
+    public static void main(String[] args) {  
+       SpringApplication.run(ApiCoreApp.class, args);  
+    }  
 }
 ```
 
-`@RestController` 的意思就是controller里面的方法都以json格式输出，不用再写什么jackjson配置的了！
+ 那么这时候在实体类中使用@JSONField(serialize=false)，是不是此字段就不返回了，就说明应用成功，其中JSONField的包路径是：com.alibaba.fastjson.annotation.JSONField。
 
 3、启动主程序，打开浏览器访问http://localhost:8080/hello，就可以看到效果了！
+
+（还有一种启动方式：
+
+右键project – Run as – Maven build – 在Goals里输入spring-boot:run ,然后Apply,最后点击Run。）
 
 无需做什么额外的配置，而且还不需要启动tomcate. 
 
@@ -238,6 +326,7 @@ public class HelloWorldController {
 
 ```java
 @SpringBootApplication
+// @SpringBootApplication申明让spring boot自动给程序进行必要的配置，等价于以默认属性使用@Configuration，@EnableAutoConfiguration和@ComponentScan
 public class StartProject extends SpringBootServletInitializer {
 	public static void main(String[] args) {
 		SpringApplication.run(StartProject.class, args);
@@ -419,7 +508,146 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 
-# springBoot web综合开发
+### Spring Boot热部署
+
+配置springBoot 支持热部署springloaded
+
+```xml
+<plugin>  
+                     <groupId>org.springframework.boot</groupId>  
+                     <artifactId>spring-boot-maven-plugin </artifactId>  
+                     <dependencies>   
+                       <!--springloaded  hot deploy -->   
+                       <dependency>   
+                           <groupId>org.springframework</groupId>   
+                           <artifactId>springloaded</artifactId>   
+                           <version>1.2.4.RELEASE</version>  
+                       </dependency>   
+                    </dependencies>   
+                    <executions>   
+                       <execution>   
+                           <goals>   
+                               <goal>repackage</goal>   
+                           </goals>   
+                           <configuration>   
+                               <classifier>exec</classifier>   
+                           </configuration>   
+                       </execution>   
+                     </executions>  
+</plugin>  
+```
+
+如果是使用spring-boot:run的话，那么到此配置结束(要想在eclipse中使用spring-boot:run，右键project –> Run as –> Maven build –> 在Goals里输入spring-boot:run ,然后Apply,最后点击Run。 (可以安装spring tools插件方便构建项目))
+
+ 如果使用的`run as – java application`的话，那么还需要做一些处理：
+
+把spring-loader-1.2.4.RELEASE.jar下载下来，放到项目的lib目录中，然后把IDEA的run参数里VM参数设置为：
+
+-javaagent:.\lib\springloaded-1.2.4.RELEASE.jar -noverify
+
+然后启动就可以了，这样在run as的时候，也能进行热部署了。并不是所有的代码都支持热部署了
+
+
+
+### 全局异常捕捉
+
+在一个项目中的异常我们我们都会统一进行处理的，那么如何进行统一进行处理呢？
+
+新建一个类GlobalDefaultExceptionHandler，
+
+```java
+@ControllerAdvice
+//在class注解上@ControllerAdvice
+public class GlobalDefaultExceptionHandler {
+    
+    @ExceptionHandler(value = Exception.class)
+    //方法上注解上@ExceptionHandler(value = Exception.class
+    public void defaultErrorHandler(HttpServletRequest req, Exception e)  {
+      //打印异常信息：
+       e.printStackTrace();
+       System.out.println("GlobalDefaultExceptionHandler.defaultErrorHandler()");
+// 返回json数据或者String数据：那么需要在方法上加上注解：@ResponseBody添加return即可。
+//返回视图：定义一个ModelAndView即可，然后return;定义视图文件(比如：error.html,error.ftl,error.jsp)
+
+  }
+}
+```
+
+controller方法中抛出了异常,那么在控制台就可以看到我们全局捕捉的异常信息了
+
+### SpringBoot的基本配置
+
+**SpringBoot修改端口号**
+
+Spring boot 默认端口是8080，如果想要进行更改的话，只需要修改applicatoin.properties文件，在配置文件中加入：
+
+```properties
+server.port=9090
+```
+
+**Spring Boot配置ContextPath**
+
+Spring boot默认是/ ，这样直接通过[http://ip:port/](http://ipport/)就可以访问到index页面，如果要修改为[http://ip:port/path/](http://ipport/)访问的话，那么需要在Application.properties文件中加入server.context-path = /你的path,比如：spring-boot,那么访问地址就是[http://ip:port/spring-boot](http://ipport/) 路径。
+
+```properties
+server.context-path=/spring-boot
+```
+
+**改变JDK编译版本**
+
+Spring Boot在编译的时候，是有默认JDK版本的，如果我们期望使用我们要的JDK版本的话，那么要怎么配置呢？
+
+这个只需要修改pom.xml文件的`<build> -- <plugins>`加入一个plugin即可。
+
+```xml
+<plugin>
+   <artifactId>maven-compiler-plugin</artifactId>
+   <configuration>
+      <source>1.8</source>
+      <target>1.8</target>
+   </configuration>
+</plugin> 
+```
+
+添加了plugin之后，需要右键Maven à Update Projects,这时候你可以看到工程根目录下的JRE System Library 版本更改。
+
+**处理静态资源(默认资源映射)**
+
+Spring Boot 默认为我们提供了静态资源处理，使用 `WebMvcAutoConfiguration` 中的配置各种属性。建议使用Spring Boot的默认配置方式，如果需要特殊处理的再通过配置进行修改。
+
+如果想要自己完全控制的  WebMVC，就需要在`@Configuration`注解的配置类上增加`@EnableWebMvc`,
+
+（`@SpringBootApplication` 注解的程序入口类已经包含`@Configuration`）
+
+增加该注解以后WebMvcAutoConfiguration中配置就不会生效，你需要自己来配置需要的每一项。
+
+**默认资源映射**
+
+我们在启动应用的时候，可以在控制台中看到如下信息：
+
+```
+2016-01-08 09:29:30.362  INFO 24932 ---[           main]o.s.w.s.handler.SimpleUrlHandlerMapping  : MappedURLpath[/webjars/**]ontohandleroftype[class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2016-01-08 09:29:30.362  INFO 24932 ---[           main]o.s.w.s.handler.SimpleUrlHandlerMapping  : MappedURLpath[/**]ontohandleroftype[class org.springframework.web.servlet.resource.ResourceHttpRequestHandler]
+2016-01-08 09:29:30.437  INFO 24932 ---[           main]o.s.w.s.handler.SimpleUrlHandlerMapping  : MappedURLpath[/**/favicon.ico]ont
+```
+
+其中默认配置的 /** 映射到 /static （或/public、/resources、/META-INF/resources） 
+其中默认配置的 /webjars/** 映射到 classpath:/META-INF/resources/webjars/ 
+<u>上面的 static、public、resources 等目录都在 classpath: 下面（如 src/main/resources/static）</u>。
+
+如果我按如下结构存放相同名称的图片，那么Spring Boot 读取图片的优先级是怎样的呢？ 
+
+如下图： 
+
+![img](http://dl2.iteye.com/upload/attachment/0116/7545/78bfa678-a101-35e4-8e26-9e3cda6a61fc.png)
+
+当我们访问地址 <http://localhost:8080/test.jpg> 的时候，显示哪张图片？
+
+优先级顺序为：META/resources > resources > static > public  
+
+如果我们想访问test2.jpg，请求地址 <http://localhost:8080/img/test2.jpg>
+
+# SpringBoot web综合开发
 
 ## web开发
 
@@ -934,7 +1162,34 @@ path为本机的log地址，`logging.level ` 后面可以根据包路径配置�
 
 ## 数据库操作 
 
+任何平台都离不了数据库的操作，在spring boot中如何接入数据库
+
+大体步骤：
+
+```
+(1) 在application.properties中加入datasouce的配置
+spring.datasource.url = jdbc:mysql://localhost:3306/test
+spring.datasource.username = root
+spring.datasource.password = root
+spring.datasource.driverClassName = com.mysql.jdbc.Driver
+spring.datasource.max-active=20
+spring.datasource.max-idle=8
+spring.datasource.min-idle=8
+spring.datasource.initial-size=10
+(2) 在pom.xml加入mysql的依赖。
+<dependency>
+       <groupId>mysql</groupId>
+       <artifactId>mysql-connector-java</artifactId>
+</dependency>
+(3) 获取DataSouce的Connection进行测试。
+
+```
+
 这里重点讲mysql、spring data jpa的使用，jpa是利用Hibernate生成各种自动化的sql，如果只是简单的增删改查，基本上不用手写了，spring内部已经封装实现了。
+
+什么是JPA:
+
+JPA全称Java Persistence API.JPA通过JDK 5.0**注解或XML描述对象－关系表的映射关系**，并将运行期的实体[对象持久化](http://baike.baidu.com/view/402359.htm)到数据库中
 
 简单介绍一下如何在spring boot中使用
 
@@ -974,12 +1229,28 @@ spring.jpa.show-sql= true
 `dialect` 主要是指定生成表名的存储引擎为InneoDB
 `show-sql` 是否打印出自动生产的SQL，方便调试的时候查看
 
+------
+
+
+
+```
+总体步骤：
+(1)   创建实体类Demo。
+(2)   创建jpa repository类操作持久化。
+(3)   创建service类。
+(4)   创建restful请求类。
+(5)   测试
+```
+
+------
+
+
+
 ### 3、添加实体类和Dao
 
 ```java
-@Entity
+@Entity //加入这个注解，Demo就会进行持久化了， 建立与数据库表的映射关系 ，还可以使用@Table注解配置持久化的表名
 public class User implements Serializable {
-
 	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue
@@ -993,14 +1264,16 @@ public class User implements Serializable {
 	@Column(nullable = true, unique = true)
 	private String nickName;
 	@Column(nullable = false)
-	private String regTime;
-
+	private String regTime；
 	//省略getter settet方法、构造方法
-
 }
 ```
 
-dao只要继承JpaRepository类就可以，几乎可以不用写方法，有一个特别功能非常赞，就是可以根据方法名来自动的生产SQL，比如`findByUserName` 会自动生产一个以 `userName` 为参数的查询方法，比如 `findAlll` 自动会查询表里面的所有数据，比如自动分页等等。。
+
+
+DAO只要继承JpaRepository类就可以，几乎可以不用写方法。
+
+有一个特别功能非常赞，就是可以根据方法名来自动的生产SQL，比如`findByUserName` 会自动生产一个以 `userName` 为参数的查询方法，比如 `findAlll` 自动会查询表里面的所有数据，比如自动分页等等。(这里的Dao层类似于mvc中的serviceImpl 层)
 
 **Entity中不映射成列的字段得加@Transient 注解，不加注解也会映射成列**
 
@@ -1023,9 +1296,8 @@ public class UserRepositoryTests {
 	@Test
 	public void test() throws Exception {
 		Date date = new Date();
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);        
-		String formattedDate = dateFormat.format(date);
-		
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG); 
+		String formattedDate = dateFormat.format(date);	
 		userRepository.save(new User("aa1", "aa@126.com", "aa", "aa123456",formattedDate));
 		userRepository.save(new User("bb2", "bb@126.com", "bb", "bb123456",formattedDate));
 		userRepository.save(new User("cc3", "cc@126.com", "cc", "cc123456",formattedDate));
@@ -1499,6 +1771,126 @@ th:include 和 th:replace区别，include只是加载，replace是替换
 layout 是文件地址，如果有文件夹可以这样写 fileName/layout:htmlhead
 htmlhead 是指定义的代码片段 如 `th:fragment="copy"`
 
+## 关闭thymeleaf缓存
+
+Thymeleaf缓存在开发过程中，肯定是不行的，那么就要在开发的时候把缓存关闭，需要在application.properties进行配置
+
+```properties
+spring.thymeleaf.cache=false
+```
+
+## 使用freemarker
+
+和使用thymeleaf很类似。除最基础的模板编写风格以外，不同的是：
+
+```xml
+<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-freemarker</artifactId>
+</dependency>
+```
+
+引入配置：
+
+```properties
+##FREEMARKER (FreeMarkerAutoConfiguration)
+
+########################################################
+
+spring.freemarker.allow-request-override=false
+
+spring.freemarker.cache=true
+
+spring.freemarker.check-template-location=true
+
+spring.freemarker.charset=UTF-8
+
+spring.freemarker.content-type=text/html
+
+spring.freemarker.expose-request-attributes=false
+
+spring.freemarker.expose-session-attributes=false
+
+spring.freemarker.expose-spring-macro-helpers=false
+
+#spring.freemarker.prefix=
+
+#spring.freemarker.request-context-attribute=
+
+#spring.freemarker.settings.*=
+
+#spring.freemarker.suffix=.ftl
+
+#spring.freemarker.template-loader-path=classpath:/templates/#comma-separatedlist
+
+#spring.freemarker.view-names= #whitelistofviewnamesthatcanberesolved
+```
+
+## 使用jsp
+
+springBoot并不推荐使用jsp,如果硬是要使用
+
+依赖： 额外引入
+
+```xml
+ <!-- servlet 依赖. -->  
+       <dependency>  
+           <groupId>javax.servlet</groupId>  
+           <artifactId>javax.servlet-api</artifactId>  
+           <scope>provided</scope>  
+       </dependency>  
+        
+       <!--  
+           JSTL（JSP Standard Tag Library，JSP标准标签库)是一个不断完善的开放源代码的JSP标签库，是由apache的jakarta小组来维护的。JSTL只能运行在支持JSP1.2和Servlet2.3规范的容器上，如tomcat 4.x。在JSP 2.0中也是作为标准支持的。  
+            
+           不然报异常信息：  
+           javax.servlet.ServletException: Circular view path [/helloJsp]: would dispatch back to the current handler URL [/helloJsp] again. Check your ViewResolver setup! (Hint: This may be the result of an unspecified view, due to default view name generation.)  
+              
+        -->  
+       <dependency>  
+           <groupId>javax.servlet</groupId>  
+           <artifactId>jstl</artifactId>  
+       </dependency>  
+        
+       <!-- tomcat 的支持.-->  
+       <dependency>  
+           <groupId>org.springframework.boot</groupId>  
+           <artifactId>spring-boot-starter-tomcat</artifactId>  
+           <scope>provided</scope>  
+       </dependency>  
+       <dependency>  
+           <groupId>org.apache.tomcat.embed</groupId>  
+           <artifactId>tomcat-embed-jasper</artifactId>  
+           <scope>provided</scope>  
+       </dependency>  
+```
+
+jdk编译版本：
+
+```xml
+<build>
+       <finalName>spring-boot-jsp</finalName>
+       <plugins>
+           <plugin>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                  <source>1.8</source>
+                  <target>1.8</target>
+              </configuration>
+           </plugin>
+       </plugins>
+    </build>
+```
+
+properties：想使用JSP需要配置application.properties
+
+```properties
+# 页面默认前缀目录
+spring.mvc.view.prefix=/WEB-INF/jsp/
+# 响应页面默认后缀
+spring.mvc.view.suffix=.jsp
+```
+
 ## Gradle 构建工具
 
 spring 项目建议使用Gradle进行构建项目，相比maven来讲 Gradle更简洁，而且gradle更适合大型复杂项目的构建。gradle吸收了maven和ant的特点而来，不过目前maven仍然是Java界的主流。
@@ -1586,6 +1978,432 @@ WebJars是一个很神奇的东西，可以让大家以jar包的形式来使用�
 ```
 
 就可以正常使用了！
+
+## SpringBoot中的定时任务
+
+Spring Boot 中定时任务使用非常简单:
+
+```java
+//定时任务
+@Configuration
+@EnableScheduling
+public class SchedulingConfig {
+    @Scheduled(cron = "0/20 * * * * ?") // 每20秒执行一次
+    public void scheduler() {
+        System.out.println(">>>>>>>>> SchedulingConfig.scheduler()");
+    }
+}
+
+```
+
+## Spring Boot使用Druid和监控配置 （配置文件）
+
+什么是Druid？
+
+Druid是Java语言中最好的数据库连接池，并且能够提供强大的监控和扩展功能(选择使用它的原因)。
+
+ Spring Boot 中配置使用Druid:
+
+(1)添加Maven依赖 (或jar包)
+
+```xml
+<dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.0.18</version>
+</dependency>
+```
+
+(2)、配置数据源相关信息
+
+```properties
+# 数据库访问配置
+# 主数据源，默认的
+# spring.datasource.type=com.alibaba.druid.pool.DruidDataSource 已经废弃了
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+spring.datasource.url=jdbc:mysql://localhost:3306/test
+spring.datasource.username=root
+spring.datasource.password=123456
+# 下面为连接池的补充设置，应用到上面所有数据源中
+# 初始化大小，最小，最大
+spring.datasource.initialSize=5
+spring.datasource.minIdle=5
+spring.datasource.maxActive=20
+# 配置获取连接等待超时的时间
+spring.datasource.maxWait=60000
+spring.datasource.timeBetweenEvictionRunsMillis=60000
+# 配置一个连接在池中最小生存的时间，单位是毫秒
+spring.datasource.minEvictableIdleTimeMillis=300000
+spring.datasource.validationQuery=SELECT 1 FROM DUAL
+spring.datasource.testWhileIdle=true
+spring.datasource.testOnBorrow=false
+spring.datasource.testOnReturn=false
+# 打开PSCache，并且指定每个连接上PSCache的大小
+spring.datasource.poolPreparedStatements=true
+spring.datasource.maxPoolPreparedStatementPerConnectionSize=20
+# 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+spring.datasource.filters=stat,wall,log4j
+# 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+spring.datasource.connectionProperties=druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+# 合并多个DruidDataSource的监控数据
+#spring.datasource.useGlobalDataSourceStat=true
+```
+
+(3) 配置监控统计功能
+
+#### 配置Servlet---DruidStatViewServlet
+
+如下是在SpringBoot项目中基于注解的配置：
+
+```java
+//druid数据源状态监控.
+@WebServlet(urlPatterns="/druid/*",
+initParams={
+    @WebInitParam(name="allow",value="192.168.1.72,127.0.0.1"),
+    // IP白名单 (没有配置或者为空，则允许所有访问)
+    @WebInitParam(name="deny",value="192.168.1.73"),// IP黑名单 (存在共同时，deny优先于allow)
+    @WebInitParam(name="loginUsername",value="admin"),// 用户名
+    @WebInitParam(name="loginPassword",value="123456"),// 密码
+    @WebInitParam(name="resetEnable",value="false")// 禁用HTML页面上的“Reset All”功能
+       }
+)
+public class DruidStatViewServlet extends StatViewServlet{
+    privatestaticfinallongserialVersionUID = 1L;  
+}
+```
+
+#### 配置Filter----DruidStatFilter 
+
+```java
+//druid过滤器
+@WebFilter(filterName="druidWebStatFilter",urlPatterns="/*",
+    initParams={            @WebInitParam(name="exclusions",value="*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*")// 忽略资源
+        }
+)
+
+public class DruidStatFilter extends WebStatFilter{
+}
+```
+
+最后在controller类上加上注解：`@ServletComponentScan`是的spring能够扫描到我们自己编写的servlet和filter。
+
+注意不要忘记在 启动类上添加 @ServletComponentScan 注解，不然就是404了。
+
+然后启动项目后访问 <http://127.0.0.1:8080/druid/index.html> 即可查看数据源及SQL统计等。  
+
+(4)配置监控系统方式二：
+
+在这里我们将使用另外一种方式进行处理：使用代码注册Servlet：
+
+编写类：com.kfit.base.servlet.DruidConfiguration ：
+
+```java
+//druid 配置.这样的方式不需要添加注解：@ServletComponentScan
+@Configuration
+public class DruidConfiguration {
+    /**
+     * 注册一个StatViewServlet
+     * @return
+     */
+    @Bean
+    public ServletRegistrationBean DruidStatViewServle2(){
+       //org.springframework.boot.context.embedded.ServletRegistrationBean提供类的进行注册.
+       ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(new StatViewServlet(),"/druid2/*");   
+       //添加初始化参数：initParams
+       //白名单：
+       servletRegistrationBean.addInitParameter("allow","127.0.0.1");
+       //IP黑名单 (存在共同时，deny优先于allow) : 如果满足deny的话提示:Sorry, you are not permitted to view this page.
+       servletRegistrationBean.addInitParameter("deny","192.168.1.73");
+       //登录查看信息的账号密码.
+       servletRegistrationBean.addInitParameter("loginUsername","admin2");
+       servletRegistrationBean.addInitParameter("loginPassword","123456");
+       //是否能够重置数据.
+       servletRegistrationBean.addInitParameter("resetEnable","false");
+       return servletRegistrationBean;
+    }
+
+ 
+
+    /**
+     * 注册一个：filterRegistrationBean
+     * @return
+     */
+    @Bean
+    public FilterRegistrationBean druidStatFilter2(){    
+       FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(new                       WebStatFilter());     
+       //添加过滤规则.
+       filterRegistrationBean.addUrlPatterns("/*");     
+       //添加不需要忽略的格式信息.
+  filterRegistrationBean.addInitParameter("exclusions","*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid2/*");
+      return filterRegistrationBean;
+
+    }
+}
+```
+
+启动应用就可以访问：<http://127.0.0.1:8080/druid2/index.html>输入账号和密码：admin2/123456 就可以访问了。
+
+## Spring Boot使用Druid（编程注入）
+
+```java
+//这样的方式不需要添加注解：@ServletComponentScan
+@Configuration
+public class DruidConfiguration {
+
+	// 注册一个StatViewServlet
+	@Bean
+	public ServletRegistrationBean DruidStatViewServle2() {
+		// org.springframework.boot.context.embedded.ServletRegistrationBean提供类的进行注册.
+		ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean(
+				new StatViewServlet(), "/druid2/*");
+
+		// 添加初始化参数：initParams
+		// 白名单：
+		servletRegistrationBean.addInitParameter("allow", "127.0.0.1");
+		// IP黑名单 (存在共同时，deny优先于allow) : 如果满足deny的话提示:Sorry, you are not
+		// permitted to view this page.
+		servletRegistrationBean.addInitParameter("deny", "192.168.1.73");
+		// 登录查看信息的账号密码.
+		servletRegistrationBean.addInitParameter("loginUsername", "admin2");
+		servletRegistrationBean.addInitParameter("loginPassword", "123456");
+		// 是否能够重置数据.
+		servletRegistrationBean.addInitParameter("resetEnable", "false");
+		return servletRegistrationBean;
+
+	}
+
+//注册一个：filterRegistrationBean
+	@Bean
+	public FilterRegistrationBean druidStatFilter2() {
+		FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean(
+				new WebStatFilter());
+		// 添加过滤规则.
+		filterRegistrationBean.addUrlPatterns("/*");
+		// 添加不需要忽略的格式信息.
+		filterRegistrationBean.addInitParameter("exclusions",
+				"*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid2/*");
+		return filterRegistrationBean;
+
+	}
+
+	/**
+	 * 注册dataSouce，这里作为一个例子，只注入了部分参数信息，其它的参数自行扩散思维。
+     */
+	@Bean
+	public DataSource druidDataSource(
+			@Value("${spring.datasource.driverClassName}") String driver,
+			@Value("${spring.datasource.url}") String url,
+			@Value("${spring.datasource.username}") String username,
+			@Value("${spring.datasource.password}") String password,
+			@Value("${spring.datasource.maxActive}") int maxActive
+
+	) {
+
+		DruidDataSource druidDataSource = new DruidDataSource();
+		druidDataSource.setDriverClassName(driver);
+		druidDataSource.setUrl(url);
+		druidDataSource.setUsername(username);
+		druidDataSource.setPassword(password);
+		druidDataSource.setMaxActive(maxActive);
+		try {
+			druidDataSource.setFilters("stat, wall");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return druidDataSource;
+
+	}
+
+}
+//这里的区别在于加入一个方法：druidDataSource进行数据源的注入.
+//如果同时进行了编程式的注入和配置的注入，配置的就无效了。实际中推荐使用配置文件的方式
+```
+
+
+
+## Spring Boot  中使用Servlet、Filter、Listener、Interceptor 
+
+Web开发使用 Controller 基本上可以完成大部分需求，但是我们还可能会用到 Servlet、Filter、Listener、Interceptor 等等。
+
+当使用Spring-Boot时，嵌入式Servlet容器通过**扫描注解**的方式注册Servlet、Filter和Servlet规范的所有监听器（如HttpSessionListener监听器）。 
+
+spring boot中添加自己的Servlet有两种方法，代码注册和注解自动注册
+
+一、代码注册通过ServletRegistrationBean、 FilterRegistrationBean 和ServletListenerRegistrationBean 获得控制。 
+也可以通过实现 ServletContextInitializer 接口直接注册。
+
+二、在 SpringBootApplication 上使用`@ServletComponentScan`注解后，Servlet、Filter、Listener 可以直接通过 `@WebServlet、@WebFilter、@WebListener` 注解自动注册，无需其他代码。  ( 常用)
+
+## Spring Boot 拦截器HandlerInterceptor
+
+Web开发中，我们除了使用 Filter 来过滤请web求外，还可以使用Spring提供的HandlerInterceptor（拦截器）。
+
+HandlerInterceptor 的功能跟过滤器类似，但是提供更精细的的控制能力：在request被响应之前、request被响应之后、视图渲染之前以及request全部结束之后。我们不能通过拦截器修改request内容，但是可以通过抛出异常（或者返回false）来暂停request的执行。
+
+spring Boot使用的拦截器就是spring的拦截器。 
+
+配置拦截器也很简单，Spring 为什么提供了基础类WebMvcConfigurerAdapter ，我们只需要重写addInterceptors 方法添加注册拦截器。
+
+实现自定义拦截器只需要3步： 
+1、创建我们自己的拦截器类并实现 HandlerInterceptor 接口。 
+2、创建一个Java类继承WebMvcConfigurerAdapter，并重写 addInterceptors 方法。 
+2、实例化我们自定义的拦截器，然后将对像手动添加到拦截器链中（在addInterceptors方法中添加）。 
+
+```java
+@Configuration
+public class MyWebAppConfigurer extends WebMvcConfigurerAdapter {
+    @Override
+    publicvoid addInterceptors(InterceptorRegistry registry) {
+        // 多个拦截器组成一个拦截器链
+        // addPathPatterns 用于添加拦截规则
+        // excludePathPatterns 用户排除拦截
+        registry.addInterceptor(new MyInterceptor1()).addPathPatterns("/**");
+        registry.addInterceptor(new MyInterceptor2()).addPathPatterns("/**");
+        super.addInterceptors(registry);
+
+    }
+
+}
+```
+
+**只有经过DispatcherServlet 的请求，才会走拦截器链**，我们自定义的Servlet 请求是不会被拦截的，比如我们自定义的Servlet地址<http://localhost:8080/myServlet>1 是不会被拦截器拦截的。并且不管是属于哪个Servlet 只要复合**过滤器**的过滤规则，过滤器都会拦截。
+
+最后说明下，我们上面用到的 WebMvcConfigurerAdapter 并非只是注册添加拦截器使用，其顾名思义是做Web配置用的，它还可以有很多其他作用.
+
+##  Spring Boot启动加载数据CommandLineRunner
+
+实际应用中，我们会有**在项目服务启动的时候就去加载一些数据或做一些事情这样的需求**。 
+为了解决这样的问题，Spring Boot 为我们提供了一个方法，通过实现接口 CommandLineRunner 来实现。
+
+```java
+/**
+ * 服务启动执行
+ */
+
+@Component
+@Order(value=2)
+//以利用@Order注解（或者实现Order接口）来规定所有CommandLineRunner实例的运行顺序。
+public class MyStartupRunner1 implements CommandLineRunner {
+	@Override
+	public void run(String... args) throws Exception {
+       // 这个方法会在项目启动的时候执行。并不一定用来加载数据。我们也可以用来做一些其他的事
+		System.out.println(">>>>>>>>>>>>>>>服务启动执行，执行加载数据等操作<<<<<<<<<<<<<");
+	}
+
+}
+```
+
+Spring Boot应用程序在启动后，会遍历CommandLineRunner接口的实例并运行它们的run方法。
+
+```java
+public void run(String... args) throws Exception {
+            System.out.println(Arrays.asList(args));
+    System.out.println(">>>>>>>>>>>>>>>服务启动执行，执行加载数据等操作11111111<<<<<<<<<<<<<");
+}
+
+/*这里的args就是程序启动的时候进行设置的:
+SpringApplication.run(App.class, new String[]{"hello,","林峰"});
+这里为了做演示，配置为固定值了，其实直接接收main中的args即可，那么在运行的时候，进行配置即可*/
+```
+
+```
+eclipse中给java应用传args参数的方法如下：
+1、先写好Java代码，比如文件名为IntArrqy.java；
+2、在工具栏或菜单上点run as下边有个Run Configuration；
+3、在弹出窗口点选第二个标签arguments；
+4、把你想输入的参数写在program argumenst就可以了，多个参数使用空格隔开。
+完成后点run即可通过运行结 果看到参数使用情况了
+```
+
+## Spring Boot环境变量读取
+
+凡是被Spring管理的类，实现接口 EnvironmentAware 重写方法 setEnvironment 可以在工程启动时，获取到系统环境变量
+
+```java
+/**
+ * 主要是@Configuration，实现接口：EnvironmentAware就能获取到系统环境信息;
+ */
+
+@Configuration
+public class MyEnvironmentAware implements EnvironmentAware {
+	// 注入application.properties的属性到指定变量中.
+	@Value("${spring.datasource.url}")
+	private String myUrl;
+
+	/**
+	 * 注意重写的方法 setEnvironment 是在系统启动的时候被执行。
+	 */
+	@Override
+	public void setEnvironment(Environment environment) {
+		// 打印注入的属性信息.
+		System.out.println("myUrl=" + myUrl);
+		// 通过 environment 获取到系统属性.
+		System.out.println(environment.getProperty("JAVA_HOME"));
+		// 通过 environment 同样能获取到application.properties配置的属性.
+		System.out.println(environment.getProperty("spring.datasource.url"));
+		// 获取到前缀是"spring.datasource." 的属性列表值.
+		RelaxedPropertyResolver relaxedPropertyResolver = new RelaxedPropertyResolver(
+				environment, "spring.datasource.");
+		System.out.println("spring.datasource.url="
+				+ relaxedPropertyResolver.getProperty("url"));
+		System.out.println("spring.datasource.driverClassName="
+				+ relaxedPropertyResolver.getProperty("driverClassName"));
+	}
+
+}
+```
+
+## Spring Boot改变自动扫描的包
+
+在开发中我们知道Spring Boot默认会扫描启动类同包以及子包下的注解
+
+那么如何进行改变这种扫描包的方式:
+
+原理很简单就是：@ComponentScan注解进行指定要扫描的包以及要扫描的类。
+
+```java
+@ComponentScan(basePackages={"cn.kfit","org.kfit"})
+//将这个注解加在启动类上，扫描指定的包
+//这里需要注意的是，加上这个注解之后，springBoot就只会扫面注解中指定的表。这样启动类所在的包及子包就不会被自动扫描，如果想扫描这个包，就加在注解后面
+```
+
+##  Spring Boot Junit 单元测试
+
+spring Boot 中使用Junit单元测试需要注意：
+
+Spring Boot如何使用Junit呢？
+
+​      1). 加入Maven的依赖；
+
+```xml
+<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+</dependency>
+```
+
+​      2). 编写测试service;
+
+​      3). 编写测试类;
+
+```java
+// / SpringJUnit支持，由此引入Spring-Test框架支持！
+@RunWith(SpringJUnit4ClassRunner.class)
+// //指定我们SpringBoot工程的Application启动类
+@SpringApplicationConfiguration(classes = App.class) // 这里APP是启动类
+// /由于是Web项目，Junit需要模拟ServletContext，因此我们需要给我们的测试类加上@WebAppConfiguration。
+@WebAppConfiguration
+public class HelloServiceTest {
+	@Resource
+	private HelloService helloService;
+	@Test
+	publicvoid testGetName() {
+		Assert.assertEquals("hello", helloService.getName());
+	}
+}
+//这时候就可以进行测试了，右键—Run As – Junit Test。
+```
 
 # Spring boot中Redis的使用
 
@@ -1978,7 +2796,7 @@ t(spring:session:expirations:1472976480000
 
 按照上面的步骤在另一个项目中再次配置一次，启动后自动就进行了session共享。因为他是将session存储在redis缓存中
 
-# spring data jpa的使用
+# Spring data jpa的使用
 
 ## spring data jpa介绍
 
