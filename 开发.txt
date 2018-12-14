@@ -1,0 +1,304 @@
+
+
+=======================================
+地址：
+10.64.18.156
+root
+u2txeK+pBk4=
+
+你需要安装Flash插件才能完整显示QQ秀的动态内容。
+
+长安-刘影 2018/12/13 14:00:56
+F:\javaworkspace\agent\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps
+/home/appcaDevpCore/webapps/AgServer-core/WEB-INF
+/home/appcaDevpCore
+
+长安-刘影 2018/12/13 14:01:02
+F:\javaworkspace\agent\.metadata\.plugins\org.eclipse.wst.server.core\tmp1\wtpwebapps
+/home/appcaDevpWeb
+14:03:30
+长安-刘影 2018/12/13 14:03:30
+systemctl stop agapp-core
+systemctl stop agapp-web
+
+长安-刘影 2018/12/13 14:03:40
+systemctl start agapp-core
+systemctl start agapp-web
+
+
+tail -f catalina.out 
+查看日志
+
+
+/brokerManager/storeBrokerList
+fa-th-list
+13
+
+
+====================================
+eclipse git pull冲突， 找到冲突文件， add to  index . 解决冲突， 提交。
+============================================================
+安汇通
+先启动zookeeper
+再启动core
+最后启动web
+
+测试环境地址： https://ssl.mall.changan.com.cn/agapp/admin/login
+liuy
+123456
+============================================================
+店铺管理：
+http://172.26.1.79/ec-partner/
+帐号：xiyangyang   密码：111111
+商用车店铺：shangyongche/111111
+乘用车店铺：chengyongche/111111
+
+经销商管理：
+http://10.64.14.117:8088/ec-dealer/center/FrameWorkMain.htm
+cqjd001 111111 重庆骏德
+
+========================
+test环境:?
+
+PC前端：?
+
+杨凡 11-14 09:15:06
+[Photo]
+
+杨凡 11-14 09:15:06
+https://ssl.mall.changan.com.cn
+
+移动端：https://ssl.mall.changan.com.cn/caecapp/main/
+
+运营端：?http://10.64.14.114/ec-system/
+
+经销商：?http://10.64.14.117:8088/ec-dealer/
+
+test2环境:?
+
+PC前端：?https://test2.mall.changan.com.cn
+
+移动端：https://test2.mall.changan.com.cn/caecapp/main/
+
+运营端：?http://10.64.13.148/ec-system/
+
+经销商：?http://10.64.13.148:8088/ec-dealer
+
+dev环境:?
+
+PC前端：?https://dev.mall.changan.com.cn
+
+移动端：https://dev.mall.changan.com.cn/caecapp/main/
+
+运营端：?http://10.64.18.68/ec-system/
+
+经销商：?http://10.64.18.67:8080/ec-dealer/
+
+uat环境:
+
+PC前端：?https://uat.mall.changan.com.cn
+
+移动端：https://uat.mall.changan.com.cn/caecapp/main/
+
+运营端：?http://172.16.192.167/ec-system/
+经销商：?http://172.16.192.168:8088/ec-dealer
+========================
+启动购物端项目
+1： 配置 注册服务 service  serviceImpl
+2: 如果要启动，就需要先启动service层注册服务 service层的startMain。
+
+将购物端的工程想象成分布式的，每个节点机器分别部署其中的一个。
+所以如果要启动，一次要启动多个
+=======================
+每次配置了运营端的系统菜单
+ 1： 清空cookie
+ 2:  配置角色权限
+===============================
+test环境: 
+PC前端： https://ssl.mall.changan.com.cn
+移动端：https://ssl.mall.changan.com.cn/caecapp/main/
+运营端： http://10.64.14.114/ec-system/
+经销商： http://10.64.14.117:8088/ec-dealer/
+test2环境: 
+PC前端： https://test2.mall.changan.com.cn
+移动端：https://test2.mall.changan.com.cn/caecapp/main/
+运营端： http://10.64.13.148/ec-system/
+经销商： http://10.64.13.148:8088/ec-dealer
+长安-黄庚根 2018/11/2 9:48:57
+dev环境: 
+PC前端： https://dev.mall.changan.com.cn
+移动端：https://dev.mall.changan.com.cn/caecapp/main/
+运营端： http://10.64.18.68/ec-system/
+经销商： http://10.64.18.67:8080/ec-dealer/
+uat环境:
+PC前端： https://uat.mall.changan.com.cn
+移动端：https://uat.mall.changan.com.cn/caecapp/main/
+运营端： http://172.16.192.167/ec-system/
+经销商： http://172.16.192.168:8088/ec-dealer
+
+=====================================================
+目前测试环境已经部署了以下三套环境, UAT环境部署在公有云，目前还未完全可用：
+test环境:  
+PC前端： 端： https://ssl.mall.changan.com.cn
+运营端
+运营端： 端： http://10.64.14.114/ec-system/
+经销商
+经销商： 商： http://10.64.14.117:8088/ec-dealer/
+
+te
+
+test2环境: 
+PC前端： 端： https://test2.mall.changan.com.cn
+运营端
+运营端： 端： http://10.64.13.148/ec-system/
+经销商
+经销商： 商： http://10.64.13.148:8088/ec-dealer
+
+de
+
+dev环境:   
+PC前端： 端： https://dev.mall.changan.com.cn
+运营端
+运营端： 端： http://10.64.18.68/ec-system/
+经销商
+经销商： 商： http://10.64.18.67:8080/ec-dealer/
+====================================================
+test环境： https://ssl.mall.changan.com.cnssl运营端： http://10.64.14.114
+=================================================
+
+git  提交过滤
+
+运营端地址：http://10.64.13.148/ec-ccgoods/， 经销商地址：http://10.64.13.148:8080/ec-dealer/
+
+
+
+===========================
+经销商端
+重庆－重庆俊德：用户名：cqjd001	 密码：111111
+重庆－重庆俊德（商用车）：用户名：SC0024	 密码：111111
+测试环境－新经销商系统：
+http://10.64.14.117:8088/ec-dealer/
+
+
+
+============================
+环境发布：  （非正式环境）
+地址： 
+http://10.64.14.83:8080/login?from=%2Fview%2Fcaec-test-build%2F
+
+用户名 : jenkins（caec/ C9mtA3gp）
+
+步骤： 先编译后发布
+
+运营端： 
+caec-operation-ALL-tmp-test-build （选择图标是太阳的）
+
+编译等操作选择  Build with Parameters
+
+发布时：
+运营端与购物端的不同处在于 当发布运营端的时候需要填写 运营端编译时的版本号， 查看编译日志
+
+发布时候 测试环境是114（默认） pre 是118
+
+
+
+=============================
+测试支付：
+农行贷记卡：5200831111111113
+    手机号：13552535506
+    cvn2：123
+    有效期：1119（后台接口注意格式YYMM需倒一下）
+    短信验证码：123456（手机）/111111（PC）（先点获取验证码之后再输入）
+    姓名：全渠道
+    证件类型：01
+    身份证号：341126197709218366
+    
+
+===============================、
+苏宁对账平台配置信息
+//		 	serverUrl = "http://172.25.2.235/suningapi/";
+//		    appKey = "50f0f5fb2d3191504449e70477d872fd";
+//		   	appSecret = "271bd8be07de6f391337504c98329ec6";
+==============================================
+支付平台  配置信息： 
+
+appId=c8a6f61f514540c4958144197fe703cd
+
+秘钥：
+prikeyValue=30820153020100300d06092a864886f70d01010105000482013d308201390201000241008fe6dd396cebabe9d6559eb4c34d1d5761c583c11e89083ac40ddbc56f325dd339a8feb916e33a88c4c9c724b3b991b12053581a2c9a1a9e4aaad4ad9c53cdff020301000102406d1584fdd32393de5f2be872fed9a634675962d7325e8e6e7dd043991702073cc4a6399593eabea7f3ee06bbb41c90398df9b84b49ef1bb7f65de0af11cfba01022100c1f4a8d8d9b5adcc78f489105d1c70316bd9eeb15adb28202efb8144826728b1022100bdef3651f27a8ae864743aa621e31b48a3a358664080815685c3d1a7561e0daf0220479e985abac9a38bc57e46be8c235c2a63b0edbaffd9bd4f6509ea09ea3d3d810220341bb8cf6ab2ec012dee255906db03d53defc684e7155a669e7446c49dffc8c9022041f5c9079ed2df726bf0280766ba4f6c871eaeaca887702ce82d465008e1d3c8
+
+===================================
+查看 运营端正式环境的日志
+
+10.64.14.106(运营端生产环境)
+
+端口 8102
+
+operate
+CpD7^aY0
+Px8da)bCpe3vz
+
+查看日志的目录
+cd /data/tomcatlogs
+
+查看日志的语句
+tail -f daily_info.log
+
+
+===============================
+Yapi
+http://10.64.13.160:9090/login
+zhaoby  zhao7494
+
+============================================
+禅道：
+
+http://itpm.changan.com/it/index.php?m=bug&f=browse&productID=52
+zhaoby  zhaoby123
+ 
+
+#serverUrl = http://172.25.2.235/suningapi/ 
+#appKey =50f0f5fb2d3191504449e70477d872fd
+#appSecret =271bd8be07de6f391337504c98329ec6
+==========
+做一件事情问清楚（记住）这件事的背景
+
+同一个错误不能犯两次
+
+测试环境—运营管理地址：
+
+购物端的账号：
+https://ssl.mall.changan.com.cn/ca-web/login/login.html?redirect=..%2Fperson-center%2Fentrance.html
+13808384179
+向勇
+xyca2016
+
+如何根据这个电话号码账号查询到他对应的uid
+member（member_id）-->ec_order(order_id)--ec_sub_order（orderItem_id）--crm(uid)
+
+
+
+cms系统的
+登录账号：43223 密码：11111
+67865 xyca2018
+
+zhaoby1108!!
+
+http://172.26.1.79/ec-ccgoods/
+http://10.64.14.160/ec-ccgoods/login.jsp
+ 管理员：用户名：admin 密码：abcd1234
+
+会员商城店铺端
+http://172.26.1.79/ec-partner/
+登录账号：用户名：dianpu 密码：111111
+
+客户部店铺端
+账号khglb_test 密码111111
+
+
+localhost:8080/ec-order/jsp/index.jsp
+
+
+https://mall.changan.com.cn/ca-web/partsList/index.html
+
+http://src.changan.com/svn/CAEC/branches/2.0
