@@ -4,8 +4,8 @@
 
 echo .....!!!!git checkout master （执行git命令：切换至master分支）
 git pull origin master
-git  add *
-git commit  -m 'pic synchronized'
+git  add .
+git commit  -m 'pic_synchronized'
 git push origin master
 echo .....enter any key to exit
 pause>nul
