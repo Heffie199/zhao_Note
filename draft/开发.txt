@@ -1,4 +1,32 @@
+杨凡:
+test环境:?
+PC前端：?
 
+杨凡:
+https://ssl.mall.changan.com.cn
+移动端：https://ssl.mall.changan.com.cn/caecapp/main/
+运营端：?http://10.64.14.114/ec-system/
+经销商：?http://10.64.14.117:8088/ec-dealer/
+test2环境:?
+PC前端：?https://test2.mall.changan.com.cn
+移动端：https://test2.mall.changan.com.cn/caecapp/main/
+运营端：?http://10.64.13.148/ec-system/
+经销商：?http://10.64.13.148:8088/ec-dealer
+dev环境:?
+PC前端：?https://dev.mall.changan.com.cn
+移动端：https://dev.mall.changan.com.cn/caecapp/main/
+运营端：?http://10.64.18.68/ec-system/
+经销商：?http://10.64.18.67:8080/ec-dealer/
+uat环境:
+PC前端：?https://uat.mall.changan.com.cn
+移动端：https://uat.mall.changan.com.cn/caecapp/main/
+运营端：?http://172.16.192.167/ec-system/
+经销商：?http://172.16.192.168:8088/ec-dealer
+
+
+===========
+201804757
+zhao7494
 
 =======================================
 地址：
@@ -26,13 +54,19 @@ systemctl start agapp-core
 systemctl start agapp-web
 
 
+
 tail -f catalina.out 
 查看日志
 
 
-/brokerManager/storeBrokerList
-fa-th-list
-13
+==== 安汇通 jenkens
+http://10.64.14.83:8080/login?from=%2F
+用户名 :agapp
+
+长安-刘影 2018/12/18 9:56:43
+密码： AZd3^mGHp5a
+以后用jekens发布
+
 
 
 ====================================
@@ -58,12 +92,7 @@ http://10.64.14.117:8088/ec-dealer/center/FrameWorkMain.htm
 cqjd001 111111 重庆骏德
 
 ========================
-test环境:?
 
-PC前端：?
-
-杨凡 11-14 09:15:06
-[Photo]
 
 杨凡 11-14 09:15:06
 https://ssl.mall.changan.com.cn
