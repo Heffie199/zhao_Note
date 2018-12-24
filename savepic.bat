@@ -3,7 +3,7 @@
 
 cd E:\mygitRes\zhao_Note\zhao_Note
 
-echo .....!!!!git checkout master （执行git命令：切换至master分支）
+echo .....!!!!git checkout master 
 git pull origin master
 git  add .
 git commit  -m 'pic_synchronized'
