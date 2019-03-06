@@ -41,16 +41,81 @@
      1. 所有用户信息就行增删改查
 	 2. 查看缴费情况 ？（这不是很了解）
 	 看那些用户进行了选课并交费了，因为有些用户肯定是注册登陆了，但是没有选课交费
+	 3. 对老师和班级进行管理
 	
 
 ===================数据库设计=================================
 
 	role 角色表
+						  `id` int(11) NOT NULL AUTO_INCREMENT,
+				  `role_name` varchar(50) NOT NULL COMMENT '角色名',
+				  `role_level` int(10) NOT NULL COMMENT '角色级别',
 	user 用户表
+							  `id` int(11) NOT NULL AUTO_INCREMENT,
+				  `user_name` varchar(25) NOT NULL COMMENT '姓名',
+				  `password` varchar(25) DEFAULT NULL COMMENT '密码',
+				  `phone` varchar(15) NOT NULL COMMENT '电话号码',
+				  `grade` varchar(15) DEFAULT NULL COMMENT '年级',
+				  `school` varchar(25) DEFAULT NULL,
+				  `home_time` varchar(30) DEFAULT NULL COMMENT '放学时间',
 	course 课程表
+								  `id` int(11) NOT NULL AUTO_INCREMENT,
+				  `course_name` varchar(25) NOT NULL COMMENT '课程名',
+				  `grade` varchar(25) NOT NULL COMMENT '年级',
+				  `area` varchar(25) NOT NULL COMMENT '地区',
+				  `cost` decimal(15,2) NOT NULL,
+				  `course_introduction` varchar(255) NOT NULL,
+				  `time_range` varchar(255) NOT NULL COMMENT '时间段',
+
 	user_courses用户课程间关系表 
+			  `id` int(11) NOT NULL AUTO_INCREMENT,
+		  `user_id` int(11) NOT NULL COMMENT '用户id',
+		  `course_id` int(11) NOT NULL COMMENT '课程id',
+    
+	 squad 班级表
+				  `id` int(11) NOT NULL AUTO_INCREMENT,
+			  `squad_name` varchar(25) NOT NULL COMMENT '班级名称',
+			  `head_teacher_id` int(11) NOT NULL COMMENT '班主任id',
+			  `contain_num` int(11) NOT NULL COMMENT '已经容纳的人数',
+			  `course_id` int(11) NOT NULL COMMENT '课程id',
+	 
+	
+====
+每个类型托管班有两个班级，每个班级有一个班主任 。（所以这里要加上一个班级表）
+  
+课程表需要重新设计. 
+
+课程介绍页面：
+对下午托、周末托、全天托进行简介
+下午托：负责接放学+晚餐+辅导作业
+周末托（区分年级）：1、2年级：早餐+午餐+晚餐+看图识字+趣味数学+手工
+                   3、4、5年级：早餐+午餐+晚餐+语文+奥数+英语
+                   6年级：小升初辅导
+
+寒暑假托管同周末（两个班级，两个班主任）
+
+
+课程中心页面:
+
+可以按关键字查询，
+
+按分类查看，年级1~6年级
+
+按时间分为:下午托（周一—周五放学至19：00）、周末托（周六周日）、全天托（寒暑假）
+
+每个类型托管班有两个班级，每个班级有一个班主任，每个班级最多容纳50人，超过50人提示。
+选择课程后有交费页面：周一~周五下午托500元  周末托200元 全天托每月1000 有交费退费功能（不需要实际操作钱）以及选课退课功能。
+
+
+
+	
 ============
 先开发后台接口。
+
+今天任务，整理清楚需求，并修改完数据库对应的设计,并尝试模拟数据，
+
+
+并完成大部分的后台开发和测试。
 
 ===  1 .用户信息的增删改查 （这里返回json字符串）
 ===  2 .先模拟课程信息
@@ -58,6 +123,9 @@
 =====4 . 想一下怎么让不同的角色看到的是不同的页面。 (在页面判断用户角色 --- 用户角色表需要填加一个字段)；
 
 =====5 . 老师查看自己班上所有的学生
+      这里对应的数据怎么设计
+	   
+	   teacherid -->
 
 =====6 . 查看所有的缴费情况
 
@@ -66,5 +134,11 @@
 =====8 . 课程分类查询
  
 
+===================================页面设计 (参考托管星 )=========
+
+1： 主页
+         首页主要展示一些介绍，  
+            图片展示，参加托管班的优势等
+ 
 	 
 	 
