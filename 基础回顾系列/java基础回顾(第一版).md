@@ -2,6 +2,8 @@
 
 
 
+# 一： 概述
+
 1: 软件是什么？
 
  软件， 代码 是操作硬件(或者说是操作系统)去做一些动作的**指令**。
@@ -47,6 +49,8 @@
 ![JAVA_REVIEW6.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW6.png?raw=true)
 
 知识 变成 技能 (需要长时间的磨练)
+
+
 
 
 
