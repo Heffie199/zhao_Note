@@ -50,14 +50,27 @@
 
 知识 变成 技能 (需要长时间的磨练)
 
+# 二：基础
 
+1： java的跨平台性
 
+我们在widows 上写的java程序可以拿到Linux系统中执行。 
 
-
+正常的应该程序都是运行在操作系统之上。 不同操作系统的指令集不同需要重新编译。 但是java可以一次编译，不同系统都可以运行， 这是因为java 在操作系统之上封装了一层，就是jvm。 java程序不是直接运行在操作系统之上，而是运行在jvm之上
 
 ![JAVA_REVIEW7.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW7.png?raw=true)
+
+jvm运行在不同的操作系统之上。(不同的系统有不同的jvm)
+
 ![JAVA_REVIEW8.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW8.png?raw=true)
+
+2: jdk ,jre,jvm
+
 ![JAVA_REVIEW9.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW9.png?raw=true)
+
+
+
+
 ![JAVA_REVIEW10.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW10.png?raw=true)
 ![JAVA_REVIEW11.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW11.png?raw=true)
 ![JAVA_REVIEW12.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW12.png?raw=true)
