@@ -70,10 +70,20 @@ jvm运行在不同的操作系统之上。(不同的系统有不同的jvm)
 
 
 
+3: 变量的数据类型
 
 ![JAVA_REVIEW10.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW10.png?raw=true)
+
 ![JAVA_REVIEW11.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW11.png?raw=true)
+
+声明Long类型的数值变量必须以"L" 结尾。
+
 ![JAVA_REVIEW12.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW12.png?raw=true)
+
+float 单精度，只能精确到7 位
+
+
+
 ![JAVA_REVIEW13.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW13.png?raw=true)
 ![JAVA_REVIEW14.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW14.png?raw=true)
 ![JAVA_REVIEW15.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW15.png?raw=true)
