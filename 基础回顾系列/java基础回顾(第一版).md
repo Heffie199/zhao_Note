@@ -104,13 +104,24 @@ float类型的定义要加上“f” ,因为一般的小数默认的被定义为
 
 (不同类型之间存储的位数不一样， 为了方便运算变将类型变成一样的来进行计算--》补位 或截断)
 
-
-
-
 ![JAVA_REVIEW14.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW14.png?raw=true)
+
 ![JAVA_REVIEW15.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW15.png?raw=true)
+
 ![JAVA_REVIEW16.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW16.png?raw=true)
+
 ![JAVA_REVIEW17.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW17.png?raw=true)
+
+(int 能表示绝大部分数， (如果可以使用short接收)避免接收过小而编译正常，运行时异常，所以强制规范)
+
+
+
+
+
+
+
+
+
 ![JAVA_REVIEW18.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW18.png?raw=true)
 ![JAVA_REVIEW19.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW19.png?raw=true)
 ![JAVA_REVIEW20.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW20.png?raw=true)
