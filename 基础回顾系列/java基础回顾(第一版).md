@@ -82,9 +82,31 @@ jvm运行在不同的操作系统之上。(不同的系统有不同的jvm)
 
 float 单精度，只能精确到7 位
 
+float 4个字节， int 也是4个字节，但是float表示的数的范围却比int 大：
 
+原因： 这两个的表示数的方法不一样，float 自己表示数的方式是一些位来表示具体的数， 另外的一些位则来表示
+
+10 的多少次幂 。一下将表示的数的范围扩大了。 但是这样也导致这样表示的数精确度不高。
+
+float类型的定义要加上“f” ,因为一般的小数默认的被定义为double . 如果不加上f标识，相当于将double强转为float这样会导致精度丢失。
+
+
+
+4： char
 
 ![JAVA_REVIEW13.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW13.png?raw=true)
+
+5： 基础类型之间的运算的规则
+
+自动类型的提升
+
+强制类型的转换
+
+(不同类型之间存储的位数不一样， 为了方便运算变将类型变成一样的来进行计算--》补位 或截断)
+
+
+
+
 ![JAVA_REVIEW14.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW14.png?raw=true)
 ![JAVA_REVIEW15.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW15.png?raw=true)
 ![JAVA_REVIEW16.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW16.png?raw=true)
