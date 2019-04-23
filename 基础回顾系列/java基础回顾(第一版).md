@@ -114,23 +114,40 @@ float类型的定义要加上“f” ,因为一般的小数默认的被定义为
 
 (int 能表示绝大部分数， (如果可以使用short接收)避免接收过小而编译正常，运行时异常，所以强制规范)
 
-
-
-
-
-
-
-
+6: java中对数字常量，字符常量
 
 ![JAVA_REVIEW18.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW18.png?raw=true)
+
 ![JAVA_REVIEW19.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW19.png?raw=true)
+
+char 型变量+ 是做运算， 字符串+ 是做连接，字符串与任何基本类型运算其结果都是字符串。
+
+7： 进制间的转换
+
 ![JAVA_REVIEW20.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW20.png?raw=true)
+
+(一般二进制给出的都是补码)
+
 ![JAVA_REVIEW21.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW21.png?raw=true)
+
 ![JAVA_REVIEW22.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW22.png?raw=true)
+
 ![JAVA_REVIEW23.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW23.png?raw=true)
+
 ![JAVA_REVIEW24.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW24.png?raw=true)
+
 ![JAVA_REVIEW25.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW25.png?raw=true)
+
+(实际开发中调用api)
+
 ![JAVA_REVIEW26.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW26.png?raw=true)
+
+
+
+
+
+
+
 ![JAVA_REVIEW27.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW27.png?raw=true)
 ![JAVA_REVIEW28.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW28.png?raw=true)
 ![JAVA_REVIEW29.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW29.png?raw=true)
