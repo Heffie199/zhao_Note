@@ -144,19 +144,57 @@ char 型变量+ 是做运算， 字符串+ 是做连接，字符串与任何基�
 
 
 
+8: 运算
 
-
-
+取余：
 
 ![JAVA_REVIEW27.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW27.png?raw=true)
+
+++
+
 ![JAVA_REVIEW28.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW28.png?raw=true)
+
 ![JAVA_REVIEW29.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW29.png?raw=true)
+
+注意： ++ ，+= ，+% 等不会改变变量的基础类型，但是
+
+```java
+short n=10 
+
+n=n+2 
+//这样会改变，因为 n是short ,2默认是int
+```
+
+
+
+9: 逻辑操作与短路操作的区别
+
 ![JAVA_REVIEW30.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW30.png?raw=true)
+
+10： 位移运算
+
 ![JAVA_REVIEW31.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW31.png?raw=true)
+
+位移是存在限制的： 
+
 ![JAVA_REVIEW32.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW32.png?raw=true)
+
+(如果左右过多位数导致最高位发生改变，那么改数整体的值也会发生改变)
+
+实用例子：
+
 ![JAVA_REVIEW33.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW33.png?raw=true)
+
 ![JAVA_REVIEW34.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW34.png?raw=true)
+
+11：三位运算符：
+
 ![JAVA_REVIEW35.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW35.png?raw=true)
+
+
+
+
+
 ![JAVA_REVIEW36.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW36.png?raw=true)
 ![JAVA_REVIEW37.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW37.png?raw=true)
 ![JAVA_REVIEW38.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW38.png?raw=true)
