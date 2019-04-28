@@ -193,10 +193,22 @@ n=n+2
 
 
 
-
+12: 随机数
 
 ![JAVA_REVIEW36.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW36.png?raw=true)
+
+13： switch case
+
 ![JAVA_REVIEW37.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW37.png?raw=true)
+
+
+
+# END:  编程思考
+
+1： 在我们编码过程中。解决问题的思路： 满足的条件， 解决的范围。
+
+
+
 ![JAVA_REVIEW38.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW38.png?raw=true)
 ![JAVA_REVIEW39.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW39.png?raw=true)
 ![JAVA_REVIEW40.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW40.png?raw=true)
