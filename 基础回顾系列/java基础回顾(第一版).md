@@ -203,15 +203,61 @@ n=n+2
 
 
 
+14: 数组的初始化
+
+![JAVA_REVIEW38.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW38.png?raw=true)
+
+数组一旦初始化，长度就确定了。
+
+二维数组可以看成： 一个竖向的一维数组他的没个元素同样是一个一维数组 (极有可能在内存中也是这么表示的) 
+
+
+
+15： 引用变量的赋值
+
+引用变量的赋值不仅仅是地址的赋值， 还会判断类型是否一致
+
+```
+int[] ar1=XXX
+int[][] ar2=xxx;
+ar1=ar2 X 
+因为ar2 和ar1 类型不同，ar2的地址中会带着[[ ,来表示这是一个二维数组
+```
+
+变量在内存中的默认赋值
+
+![JAVA_REVIEW39.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW39.png?raw=true)
+
+16: 可变个数形参
+
+定义方式： 
+
+```
+ test1(String...str){}
+```
+
+但是  test1(String...str) 在编译器中被理解为等价于test1(String[ ] str) 
+
+所以
+
+```
+test1(String...str){}
+test1(String[] str){}
+编译器会认为两者等价，不能构成重载。 且两者的使用方法一致。  
+```
+
+![JAVA_REVIEW40.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW40.png?raw=true)
+
+适用场景： sql查询时，条件个数是可变的。
+
 # END:  编程思考
 
 1： 在我们编码过程中。解决问题的思路： 满足的条件， 解决的范围。
 
 
 
-![JAVA_REVIEW38.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW38.png?raw=true)
-![JAVA_REVIEW39.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW39.png?raw=true)
-![JAVA_REVIEW40.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW40.png?raw=true)
+
+
 ![JAVA_REVIEW41.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW41.png?raw=true)
 ![JAVA_REVIEW42.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW42.png?raw=true)
 ![JAVA_REVIEW43.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW43.png?raw=true)
