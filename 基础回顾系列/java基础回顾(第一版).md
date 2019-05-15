@@ -207,13 +207,33 @@ n=n+2
 
 1： 在我们编码过程中。解决问题的思路： 满足的条件， 解决的范围。
 
-2： 变量的赋值
+2： 在我们解决问题的过程中，如果前路不同，需要换个思路
+
+eg:
+
+![JAVA_REVIEW51.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW51.png?raw=true)
+
+![JAVA_REVIEW52.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW52.png?raw=true)
+
+3： 变量的赋值
+
+   （下面两条是基础铁则，其他的都可以通过这个类推）
 
 ​      基础数据类型的变量赋值，赋值的变量所保存的基础数据值
 
-​     引用类型的变量赋值，赋的值是引用变量的地址。
+​     引用类型的变量赋值，赋的值是引用变量的地址。  
+
+​     方法形参的值传递： **值传递** 就是实参给形参赋值  (通用上面的规则)  
+
+就相当于基础数据类型的赋值只是将实参复制了一份，并没有真正的操作实际的对象，操作的只是他的副本。
+
+但是需要注意： 形参也会在变量中入栈。
+
+![JAVA_REVIEW50.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW50.png?raw=true)
 
 
+
+=============================================================
 
 ![JAVA_REVIEW38.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW38.png?raw=true)
 ![JAVA_REVIEW39.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW39.png?raw=true)
@@ -227,5 +247,4 @@ n=n+2
 ![JAVA_REVIEW47.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW47.png?raw=true)
 ![JAVA_REVIEW48.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW48.png?raw=true)
 ![JAVA_REVIEW49.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW49.png?raw=true)
-![JAVA_REVIEW50.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW50.png?raw=true)
 
