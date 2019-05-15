@@ -226,7 +226,6 @@ ar1=ar2 X
 ```
 
 变量在内存中的默认赋值
-=======
 
 
 ![JAVA_REVIEW39.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW39.png?raw=true)
