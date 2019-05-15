@@ -207,6 +207,12 @@ n=n+2
 
 1： 在我们编码过程中。解决问题的思路： 满足的条件， 解决的范围。
 
+2： 变量的赋值
+
+​      基础数据类型的变量赋值，赋值的变量所保存的基础数据值
+
+​     引用类型的变量赋值，赋的值是引用变量的地址。
+
 
 
 ![JAVA_REVIEW38.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW38.png?raw=true)
