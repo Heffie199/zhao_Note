@@ -252,19 +252,9 @@ test1(String[] str){}
 
 适用场景： sql查询时，条件个数是可变的。
 
-# END:  编程思考
 
-1： 在我们编码过程中。解决问题的思路： 满足的条件， 解决的范围。
 
-2： 在我们解决问题的过程中，如果前路不同，需要换个思路
-
-eg:
-
-![JAVA_REVIEW51.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW51.png?raw=true)
-
-![JAVA_REVIEW52.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW52.png?raw=true)
-
-3： 变量的赋值
+17: 变量的赋值
 
    （下面两条是基础铁则，其他的都可以通过这个类推）
 
@@ -278,7 +268,31 @@ eg:
 
 但是需要注意： 形参也会在变量中入栈。
 
+
+
 ![JAVA_REVIEW50.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW50.png?raw=true)
+
+
+
+18: 构造器
+
+无论何时都会存在构造器。没有显示写构造器的时候，会有一个默认的空参构造器，但是如果显示的声明了一个构造器，默认的空参构造器就没有了。
+
+
+
+# END:  编程思考
+
+1： 在我们编码过程中。解决问题的思路： 满足的条件， 解决的范围。
+
+2： 在我们解决问题的过程中，如果前路不同，需要换个思路
+
+eg:
+
+![JAVA_REVIEW51.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW51.png?raw=true)
+
+![JAVA_REVIEW52.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW52.png?raw=true)
+
+
 
 
 
