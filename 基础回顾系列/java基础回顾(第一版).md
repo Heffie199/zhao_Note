@@ -335,7 +335,11 @@ test1(String[] str){}
 
 ![JAVA_REVIEW44.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW44.png?raw=true)
 
+25： 包装类
 
+
+
+![JAVA_REVIEW45.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW45.png?raw=true)
 
 # END:  编程思考
 
@@ -356,9 +360,6 @@ eg:
 
 
 
-
-
-![JAVA_REVIEW45.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW45.png?raw=true)
 ![JAVA_REVIEW46.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW46.png?raw=true)
 ![JAVA_REVIEW47.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW47.png?raw=true)
 ![JAVA_REVIEW48.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW48.png?raw=true)
