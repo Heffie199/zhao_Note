@@ -309,7 +309,9 @@ test1(String[] str){}
 
 子类重写方法的**返回值**(或抛出的异常)可以是父类方法的返回值(或抛出的异常)的一个子类(遵从多态性)，这里针对是类(引用数据类型)，如果是基础数据类型，则必须一致
 
-22：
+22：权限修饰符
+
+![JAVA_REVIEW42.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW42.png?raw=true)
 
 
 
@@ -338,7 +340,6 @@ eg:
 
 
 
-![JAVA_REVIEW42.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW42.png?raw=true)
 ![JAVA_REVIEW43.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW43.png?raw=true)
 ![JAVA_REVIEW44.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW44.png?raw=true)
 ![JAVA_REVIEW45.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW45.png?raw=true)
