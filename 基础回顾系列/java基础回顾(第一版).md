@@ -187,9 +187,13 @@ n=n+2
 
 ![JAVA_REVIEW34.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW34.png?raw=true)
 
-11：三位运算符：
+11：三元运算符：
 
 ![JAVA_REVIEW35.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW35.png?raw=true)
+
+ 这里需要注意： **表达式1和2 需要统一成一个类型**
+
+![JAVA_REVIEW46.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW46.png?raw=true)
 
 
 
@@ -272,6 +276,10 @@ test1(String[] str){}
 
 ![JAVA_REVIEW50.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW50.png?raw=true)
 
+赋值的顺序：
+
+![JAVA_REVIEW54.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW54.png?raw=true)
+
 
 
 18: 构造器
@@ -341,6 +349,48 @@ test1(String[] str){}
 
 ![JAVA_REVIEW45.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW45.png?raw=true)
 
+面试题：
+
+![JAVA_REVIEW47.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW47.png?raw=true)
+
+![JAVA_REVIEW48.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW48.png?raw=true)
+
+128 false 的原因。 在自动装箱的过程汇总，-128 到127 自动装箱的机率要高一些，所以java做了优化，在Integer中定义了一个IntegerCache结构静态的生成了这些数的缓存。 所以128 是新new的一个对象，地址是不同的。 1 则是取的缓存
+
+
+
+26：static
+
+类中某些特定的数据我们希望他在**内存空间中只有一份**。 被类的**所有对象所共享**，单独存放。  随着类的加载(早于对象的创建)而加载。
+
+如果类中存在所有对象都具备的相同值的属性，可以考虑申明为static。
+
+27 代码块
+
+代码块(**初始化**块 )
+
+![JAVA_REVIEW49.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW49.png?raw=true)
+
+应用：
+
+![JAVA_REVIEW53.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW53.png?raw=true)
+
+**代码块的初始化，先与构造器的初始化**。
+
+代码块的执行先于构造器。
+
+
+
+28: final (常量)
+
+![JAVA_REVIEW55.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW55.png?raw=true)
+
+
+
+
+
+# 三：高级
+
 # END:  编程思考
 
 1： 在我们编码过程中。解决问题的思路： 满足的条件， 解决的范围。
@@ -356,13 +406,48 @@ eg:
 
 
 
-
-
-
-
-![JAVA_REVIEW46.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW46.png?raw=true)
-![JAVA_REVIEW47.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW47.png?raw=true)
-![JAVA_REVIEW48.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW48.png?raw=true)
-![JAVA_REVIEW49.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW49.png?raw=true)
-
-----53
+![JAVA_REVIEW56.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW56.png?raw=true)
+![JAVA_REVIEW57.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW57.png?raw=true)
+![JAVA_REVIEW58.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW58.png?raw=true)
+![JAVA_REVIEW59.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW59.png?raw=true)
+![JAVA_REVIEW60.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW60.png?raw=true)
+![JAVA_REVIEW61.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW61.png?raw=true)
+![JAVA_REVIEW62.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW62.png?raw=true)
+![JAVA_REVIEW63.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW63.png?raw=true)
+![JAVA_REVIEW64.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW64.png?raw=true)
+![JAVA_REVIEW65.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW65.png?raw=true)
+![JAVA_REVIEW66.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW66.png?raw=true)
+![JAVA_REVIEW67.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW67.png?raw=true)
+![JAVA_REVIEW68.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW68.png?raw=true)
+![JAVA_REVIEW69.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW69.png?raw=true)
+![JAVA_REVIEW70.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW70.png?raw=true)
+![JAVA_REVIEW71.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW71.png?raw=true)
+![JAVA_REVIEW72.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW72.png?raw=true)
+![JAVA_REVIEW73.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW73.png?raw=true)
+![JAVA_REVIEW74.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW74.png?raw=true)
+![JAVA_REVIEW75.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW75.png?raw=true)
+![JAVA_REVIEW76.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW76.png?raw=true)
+![JAVA_REVIEW77.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW77.png?raw=true)
+![JAVA_REVIEW78.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW78.png?raw=true)
+![JAVA_REVIEW79.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW79.png?raw=true)
+![JAVA_REVIEW80.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW80.png?raw=true)
+![JAVA_REVIEW81.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW81.png?raw=true)
+![JAVA_REVIEW82.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW82.png?raw=true)
+![JAVA_REVIEW83.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW83.png?raw=true)
+![JAVA_REVIEW84.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW84.png?raw=true)
+![JAVA_REVIEW85.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW85.png?raw=true)
+![JAVA_REVIEW86.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW86.png?raw=true)
+![JAVA_REVIEW87.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW87.png?raw=true)
+![JAVA_REVIEW88.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW88.png?raw=true)
+![JAVA_REVIEW89.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW89.png?raw=true)
+![JAVA_REVIEW90.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW90.png?raw=true)
+![JAVA_REVIEW91.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW91.png?raw=true)
+![JAVA_REVIEW92.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW92.png?raw=true)
+![JAVA_REVIEW93.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW93.png?raw=true)
+![JAVA_REVIEW94.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW94.png?raw=true)
+![JAVA_REVIEW95.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW95.png?raw=true)
+![JAVA_REVIEW96.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW96.png?raw=true)
+![JAVA_REVIEW97.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW97.png?raw=true)
+![JAVA_REVIEW98.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW98.png?raw=true)
+![JAVA_REVIEW99.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW99.png?raw=true)
+![JAVA_REVIEW100.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW100.png?raw=true)
