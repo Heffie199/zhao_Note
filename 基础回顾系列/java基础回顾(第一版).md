@@ -389,9 +389,15 @@ test1(String[] str){}
 
 29：抽象abstract
 
+abstract 与重写息息相关。
+
  abstract 不能用来修饰私有方法。因为private修饰的方法不能被重写。如果可以修饰private方法，那么就子类都成为了抽象类。没有意义。
 
 abstract 不能修饰静态，于私有类似。 父子类的同名静态方法，不认为是重写。
+
+abstract 不能修饰已经被final 修饰的方法。  修饰为final的不能被继承，重写。 但是申明为abstract就是希望被继承。两者有冲突。
+
+抽象类中可以定义构造器，用于子类创建对象。
 
 
 
