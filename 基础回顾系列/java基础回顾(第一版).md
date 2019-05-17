@@ -70,7 +70,7 @@ jvm运行在不同的操作系统之上。(不同的系统有不同的jvm)
 
 
 
-3: 变量的数据类型
+## 3: 变量的数据类型
 
 ![JAVA_REVIEW10.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW10.png?raw=true)
 
@@ -96,7 +96,7 @@ float类型的定义要加上“f” ,因为一般的小数默认的被定义为
 
 ![JAVA_REVIEW13.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW13.png?raw=true)
 
-5： 基础类型之间的运算的规则
+## 5： 基础类型之间的运算的规则
 
 自动类型的提升 (小转大----补位)
 
@@ -187,7 +187,7 @@ n=n+2
 
 ![JAVA_REVIEW34.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW34.png?raw=true)
 
-11：三元运算符：
+## 11：三元运算符：
 
 ![JAVA_REVIEW35.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW35.png?raw=true)
 
@@ -258,7 +258,7 @@ test1(String[] str){}
 
 
 
-17: 变量的赋值
+## 17: 变量的赋值
 
    （下面两条是基础铁则，其他的都可以通过这个类推）
 
@@ -306,14 +306,16 @@ test1(String[] str){}
 
 
 
-21 : 方法重写(覆盖)中，子类重写的方法的权限修饰符要不小于父类的权限修饰符
+## 21 : 方法重写
+
+方法重写(覆盖)中，子类重写的方法的权限修饰符要不小于父类的权限修饰符
 
 理解： 方法的重写实质上就是子类的方法覆盖父类的方法。 在重写发生的继承中，子类中会存在两个同名，同形参的方法。 子类重写方法 要优于父类的方法被发现。 如果这时候父类的权限大于子类，则会导致子类的方法无法覆盖掉父类的。所以子类的重写方法的权限修饰符需要大于等于父类方法的权限修饰符。
 
 特殊情况： 
 
-​               子类不能重写父类中声明为private的方法(因为如果可以覆盖，则破坏了封装性)
-​               重写的方法一般是**都申明为非static**， static的方法不存在重写， 是应为静态的方法不能被覆盖，他是随着类的    加载而加载
+​               **子类不能重写父类中声明为private的方法** 私有的方法对于子类来说不可见(因为如果可以覆盖，则破坏了封装性)
+​               重写的方法一般是**都申明为非static**， static的方法不存在重写， 是因为静态的方法不能被覆盖，他是随着类的    加载而加载
 
 重写的提现： 如果是重写，则方法的调用是子类的实现 
 
@@ -385,7 +387,11 @@ test1(String[] str){}
 
 ![JAVA_REVIEW55.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW55.png?raw=true)
 
+29：抽象abstract
 
+ abstract 不能用来修饰私有方法。因为private修饰的方法不能被重写。如果可以修饰private方法，那么就子类都成为了抽象类。没有意义。
+
+abstract 不能修饰静态，于私有类似。 父子类的同名静态方法，不认为是重写。
 
 
 
