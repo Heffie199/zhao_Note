@@ -401,7 +401,44 @@ abstract 不能修饰已经被final 修饰的方法。  修饰为final的不能�
 
 
 
+30: 接口
+
+![JAVA_REVIEW56.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW56.png?raw=true)
+
+![JAVA_REVIEW57.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW57.png?raw=true)
+
+![JAVA_REVIEW58.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW58.png?raw=true)
+
+java8 ： 接口改进
+
+![JAVA_REVIEW59.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW59.png?raw=true)
+
+![JAVA_REVIEW60.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW60.png?raw=true)
+
+31： 内部类
+
+![JAVA_REVIEW61.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW61.png?raw=true)
+
+![JAVA_REVIEW62.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW62.png?raw=true)
+
+
+
 # 三：高级
+
+
+
+![JAVA_REVIEW63.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW63.png?raw=true)
+![JAVA_REVIEW64.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW64.png?raw=true)
+![JAVA_REVIEW65.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW65.png?raw=true)
+![JAVA_REVIEW66.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW66.png?raw=true)
+![JAVA_REVIEW67.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW67.png?raw=true)
+![JAVA_REVIEW68.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW68.png?raw=true)
+![JAVA_REVIEW69.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW69.png?raw=true)
+![JAVA_REVIEW70.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW70.png?raw=true)
+
+
+
+
 
 # END:  编程思考
 
@@ -415,24 +452,12 @@ eg:
 
 ![JAVA_REVIEW52.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW52.png?raw=true)
 
+3： 测试习惯
+
+我们编程的过程中，尽量写好一小部分就开始测试。这样避免因为后面代码写多了不好查找。
 
 
 
-![JAVA_REVIEW56.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW56.png?raw=true)
-![JAVA_REVIEW57.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW57.png?raw=true)
-![JAVA_REVIEW58.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW58.png?raw=true)
-![JAVA_REVIEW59.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW59.png?raw=true)
-![JAVA_REVIEW60.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW60.png?raw=true)
-![JAVA_REVIEW61.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW61.png?raw=true)
-![JAVA_REVIEW62.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW62.png?raw=true)
-![JAVA_REVIEW63.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW63.png?raw=true)
-![JAVA_REVIEW64.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW64.png?raw=true)
-![JAVA_REVIEW65.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW65.png?raw=true)
-![JAVA_REVIEW66.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW66.png?raw=true)
-![JAVA_REVIEW67.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW67.png?raw=true)
-![JAVA_REVIEW68.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW68.png?raw=true)
-![JAVA_REVIEW69.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW69.png?raw=true)
-![JAVA_REVIEW70.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW70.png?raw=true)
 ![JAVA_REVIEW71.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW71.png?raw=true)
 ![JAVA_REVIEW72.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW72.png?raw=true)
 ![JAVA_REVIEW73.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW73.png?raw=true)
