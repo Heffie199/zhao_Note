@@ -421,14 +421,32 @@ java8 ： 接口改进
 
 ![JAVA_REVIEW62.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW62.png?raw=true)
 
-
-
 # 三：高级
 
+1：多线程
 
+内存结构上：
+
+每个线程各自有一份独立的栈和程序计数器。 他们共享进程的方法区和堆。
+
+所以线程间的通信在进程中进行比较方便，因为在进程中是他们都可以看见的。
+
+(这个整体可以类比租房，各自有各自的卧室，但是你们共享客厅)
 
 ![JAVA_REVIEW63.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW63.png?raw=true)
+
 ![JAVA_REVIEW64.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW64.png?raw=true)
+
+
+
+
+
+
+
+
+
+
+
 ![JAVA_REVIEW65.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW65.png?raw=true)
 ![JAVA_REVIEW66.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW66.png?raw=true)
 ![JAVA_REVIEW67.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW67.png?raw=true)
