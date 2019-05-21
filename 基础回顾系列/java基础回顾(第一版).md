@@ -423,7 +423,7 @@ java8 ： 接口改进
 
 # 三：高级
 
-1：多线程
+## 1：多线程
 
 内存结构上：
 
@@ -461,16 +461,22 @@ Lock：
 
 
 
-
-
-
-
-
+2: string 
 
 ![JAVA_REVIEW71.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW71.png?raw=true)
+
 ![JAVA_REVIEW72.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW72.png?raw=true)
+
 ![JAVA_REVIEW73.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW73.png?raw=true)
+
 ![JAVA_REVIEW74.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW74.png?raw=true)
+
+
+
+
+
+
+
 ![JAVA_REVIEW75.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW75.png?raw=true)
 ![JAVA_REVIEW76.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW76.png?raw=true)
 ![JAVA_REVIEW77.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW77.png?raw=true)
