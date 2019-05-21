@@ -439,24 +439,44 @@ java8 ： 接口改进
 
 ![JAVA_REVIEW65.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW65.png?raw=true)
 
+注意： 
 
+什么是共享数据(需要加锁)
 
-
-
-
-
-
-
+同步线程安全的必要条件就是： 所有人都共用一个锁。
 
 ![JAVA_REVIEW66.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW66.png?raw=true)
+
+Lock：
+
 ![JAVA_REVIEW67.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW67.png?raw=true)
+
+线程通信， 线程1,2 交替执行。
+
 ![JAVA_REVIEW68.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW68.png?raw=true)
+
 ![JAVA_REVIEW69.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW69.png?raw=true)
+
 ![JAVA_REVIEW70.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW70.png?raw=true)
 
 
 
 
+
+
+
+
+
+![JAVA_REVIEW71.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW71.png?raw=true)
+![JAVA_REVIEW72.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW72.png?raw=true)
+![JAVA_REVIEW73.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW73.png?raw=true)
+![JAVA_REVIEW74.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW74.png?raw=true)
+![JAVA_REVIEW75.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW75.png?raw=true)
+![JAVA_REVIEW76.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW76.png?raw=true)
+![JAVA_REVIEW77.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW77.png?raw=true)
+![JAVA_REVIEW78.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW78.png?raw=true)
+![JAVA_REVIEW79.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW79.png?raw=true)
+![JAVA_REVIEW80.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW80.png?raw=true)
 
 # END:  编程思考
 
@@ -476,16 +496,7 @@ eg:
 
 
 
-![JAVA_REVIEW71.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW71.png?raw=true)
-![JAVA_REVIEW72.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW72.png?raw=true)
-![JAVA_REVIEW73.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW73.png?raw=true)
-![JAVA_REVIEW74.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW74.png?raw=true)
-![JAVA_REVIEW75.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW75.png?raw=true)
-![JAVA_REVIEW76.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW76.png?raw=true)
-![JAVA_REVIEW77.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW77.png?raw=true)
-![JAVA_REVIEW78.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW78.png?raw=true)
-![JAVA_REVIEW79.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW79.png?raw=true)
-![JAVA_REVIEW80.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW80.png?raw=true)
+
 ![JAVA_REVIEW81.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW81.png?raw=true)
 ![JAVA_REVIEW82.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW82.png?raw=true)
 ![JAVA_REVIEW83.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW83.png?raw=true)
