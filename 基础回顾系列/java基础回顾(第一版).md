@@ -485,6 +485,26 @@ Lock：
 
 ![JAVA_REVIEW80.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW80.png?raw=true)
 
+4：枚举 (定义一组变量)
+
+使用enum关键了枚举类默认继承于java.lang.ENUM类
+
+![JAVA_REVIEW81.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW81.png?raw=true)
+
+## 5: 注解(代码里的特殊标记)
+
+![JAVA_REVIEW82.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW82.png?raw=true)
+
+**注解最重要的功能：跟踪代码依赖性，实现替代配置文件功能**
+
+![JAVA_REVIEW83.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW83.png?raw=true)
+
+(注解需要与反射结合才能起作用。 是通过放射读取注解，和注解的值，才知道用户使用注解的目的是什么(信息处理流程))
+
+![JAVA_REVIEW84.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW84.png?raw=true)
+
+![JAVA_REVIEW85.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW85.png?raw=true)
+
 
 
 
@@ -511,11 +531,6 @@ eg:
 
 
 
-![JAVA_REVIEW81.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW81.png?raw=true)
-![JAVA_REVIEW82.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW82.png?raw=true)
-![JAVA_REVIEW83.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW83.png?raw=true)
-![JAVA_REVIEW84.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW84.png?raw=true)
-![JAVA_REVIEW85.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW85.png?raw=true)
 ![JAVA_REVIEW86.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW86.png?raw=true)
 ![JAVA_REVIEW87.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW87.png?raw=true)
 ![JAVA_REVIEW88.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW88.png?raw=true)
