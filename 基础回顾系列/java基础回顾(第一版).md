@@ -505,6 +505,23 @@ Lock：
 
 ![JAVA_REVIEW85.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW85.png?raw=true)
 
+6：集合
+
+![JAVA_REVIEW86.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW86.png?raw=true)
+
+![JAVA_REVIEW87.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW87.png?raw=true)
+
+![JAVA_REVIEW88.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW88.png?raw=true)
+
+![JAVA_REVIEW89.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW89.png?raw=true)
+
+List 的有序和set的无序的理解：
+
+list和set的底层都是基于数组，这里的有序和无序指的是集合中的元素在数组中存放的位置是否是“有序”。 list中元素的添加在数组中是按照下标依次存储。 set中是根据hash值随机存储。
+
+
+![JAVA_REVIEW90.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW90.png?raw=true)
+
 
 
 
@@ -531,11 +548,6 @@ eg:
 
 
 
-![JAVA_REVIEW86.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW86.png?raw=true)
-![JAVA_REVIEW87.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW87.png?raw=true)
-![JAVA_REVIEW88.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW88.png?raw=true)
-![JAVA_REVIEW89.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW89.png?raw=true)
-![JAVA_REVIEW90.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW90.png?raw=true)
 ![JAVA_REVIEW91.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW91.png?raw=true)
 ![JAVA_REVIEW92.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW92.png?raw=true)
 ![JAVA_REVIEW93.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW93.png?raw=true)
