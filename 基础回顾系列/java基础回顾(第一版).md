@@ -528,6 +528,10 @@ list和set的底层都是基于数组，这里的有序和无序指的是集合�
 
 ![JAVA_REVIEW92.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW92.png?raw=true)
 
+collections:
+
+![JAVA_REVIEW96.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW96.png?raw=true)
+
 
 
 
@@ -559,10 +563,17 @@ eg:
 
 我们编程的过程中，尽量写好一小部分就开始测试。这样避免因为后面代码写多了不好查找。
 
+4: 源码阅读方法
+
+第一步: 看构造器 。 确定其数据结构和其构造算法的思想
+
+第二步： 假设情景代入方法。
 
 
 
-![JAVA_REVIEW96.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW96.png?raw=true)
+
+
+
 ![JAVA_REVIEW97.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW97.png?raw=true)
 ![JAVA_REVIEW98.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW98.png?raw=true)
 ![JAVA_REVIEW99.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW99.png?raw=true)
