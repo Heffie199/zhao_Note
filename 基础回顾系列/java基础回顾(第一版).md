@@ -534,13 +534,17 @@ collections:
 
 
 
+7: 泛型
 
-
-
-
-
+静态(泛型方法除外) 与异常中不能使用泛型 
 
 ![JAVA_REVIEW93.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW93.png?raw=true)
+
+
+
+
+
+
 ![JAVA_REVIEW94.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW94.png?raw=true)
 ![JAVA_REVIEW95.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEW95.png?raw=true)
 
