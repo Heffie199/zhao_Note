@@ -562,19 +562,26 @@ collections:
 
 ![JAVA_REVIEWAD1.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD1.png?raw=true)
 
-
-
-
-
-
 ![JAVA_REVIEWAD2.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD2.png?raw=true)
+
+## 10 ： 反射
+
+在**运行时**获取任何类的内部信息。
+
 ![JAVA_REVIEWAD3.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD3.png?raw=true)
+
 ![JAVA_REVIEWAD4.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD4.png?raw=true)
+
 ![JAVA_REVIEWAD5.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD5.png?raw=true)
+
 ![JAVA_REVIEWAD6.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD6.png?raw=true)
+
 ![JAVA_REVIEWAD7.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD7.png?raw=true)
+
 ![JAVA_REVIEWAD8.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD8.png?raw=true)
+
 ![JAVA_REVIEWAD9.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD9.png?raw=true)
+
 ![JAVA_REVIEWAD10.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD10.png?raw=true)
 
 
