@@ -658,13 +658,17 @@ stream是延迟操作： 中间操作类似于书写sql语句(并不会去执行
 
 Optional  如何避免空指针异常：
 
+```
 
+```
 
 ![JAVA_REVIEWAD31.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD31.png?raw=true)
-![JAVA_REVIEWAD32.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD32.png?raw=true)
-![JAVA_REVIEWAD33.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD33.png?raw=true)
-![JAVA_REVIEWAD34.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD34.png?raw=true)
-![JAVA_REVIEWAD35.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD35.png?raw=true)
+
+
+
+
+
+
 
 
 
@@ -703,7 +707,10 @@ eg:
 
 
 
-
+![JAVA_REVIEWAD32.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD32.png?raw=true)
+![JAVA_REVIEWAD33.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD33.png?raw=true)
+![JAVA_REVIEWAD34.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD34.png?raw=true)
+![JAVA_REVIEWAD35.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD35.png?raw=true)
 
 
 ![JAVA_REVIEWAD36.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD36.png?raw=true)
