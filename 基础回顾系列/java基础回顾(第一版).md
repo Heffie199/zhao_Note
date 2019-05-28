@@ -584,13 +584,9 @@ collections:
 
 ![JAVA_REVIEWAD10.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD10.png?raw=true)
 
-
-
 ![JAVA_REVIEWAD11.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD11.png?raw=true)
 
 ![JAVA_REVIEWAD12.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD12.png?raw=true)
-
-
 
 ![JAVA_REVIEWAD13.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD13.png?raw=true)
 
@@ -621,6 +617,7 @@ lamda 的本质就是接口（函数式接口）的实例。 (**接口的具体�
 3： StreamAPI
 
 集合存储数据，Stream计算数据。
+
 
 ![JAVA_REVIEWAD21.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD21.png?raw=true)
 
