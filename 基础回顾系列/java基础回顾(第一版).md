@@ -585,6 +585,92 @@ collections:
 ![JAVA_REVIEWAD10.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD10.png?raw=true)
 
 
+
+![JAVA_REVIEWAD11.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD11.png?raw=true)
+
+![JAVA_REVIEWAD12.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD12.png?raw=true)
+
+
+
+![JAVA_REVIEWAD13.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD13.png?raw=true)
+
+![JAVA_REVIEWAD14.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD14.png?raw=true)
+
+![JAVA_REVIEWAD15.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD15.png?raw=true)
+
+![JAVA_REVIEWAD16.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD16.png?raw=true)
+
+
+
+# 四： java8 新特性
+
+1： lamda
+
+lamda 的本质就是接口（函数式接口）的实例。 (**接口的具体实现**) ，对原来的匿名接口实现类的一系列**简化**。
+
+![JAVA_REVIEWAD18.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD18.png?raw=true)
+
+![JAVA_REVIEWAD19.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD19.png?raw=true)
+
+2： 方法引用
+
+对lamda表达式的进一步简化，他的本质就是lamda表达式
+
+![JAVA_REVIEWAD20.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD20.png?raw=true)
+
+3： StreamAPI
+
+集合存储数据，Stream计算数据。
+
+![JAVA_REVIEWAD21.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD21.png?raw=true)
+
+stream是延迟操作： 中间操作类似于书写sql语句(并不会去执行)，执行了终止操作才是真正的执行了sql语句。一旦执行了终止操作，stream就不可用了。(类比数据库操作中的关闭连接)
+
+![JAVA_REVIEWAD22.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD22.png?raw=true)
+
+![JAVA_REVIEWAD23.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD23.png?raw=true)
+
+中间操作
+
+![JAVA_REVIEWAD24.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD24.png?raw=true)
+
+映射： 类似于数学函数，将集合中的元素通过操作转换成另外的表现形式。 x->f(x) ，可以理解生成一个新的流
+
+![JAVA_REVIEWAD25.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD25.png?raw=true)
+
+终止操作：
+
+![JAVA_REVIEWAD26.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD26.png?raw=true)
+
+![JAVA_REVIEWAD27.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD27.png?raw=true)
+
+![JAVA_REVIEWAD28.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD28.png?raw=true)
+
+**归约**
+
+![JAVA_REVIEWAD29.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD29.png?raw=true)
+
+![JAVA_REVIEWAD30.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD30.png?raw=true)
+
+4: Optional 
+
+他本身就是一个**容器**。我们将对象放入这个容器中，然后调用容器的方法来尽可能的避免空指针异常。
+
+Optional  如何避免空指针异常：
+
+
+
+![JAVA_REVIEWAD31.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD31.png?raw=true)
+![JAVA_REVIEWAD32.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD32.png?raw=true)
+![JAVA_REVIEWAD33.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD33.png?raw=true)
+![JAVA_REVIEWAD34.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD34.png?raw=true)
+![JAVA_REVIEWAD35.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD35.png?raw=true)
+
+
+
+
+
+
 # END:  编程思考
 
 1： 在我们编码过程中。解决问题的思路： 满足的条件， 解决的范围。
@@ -607,34 +693,19 @@ eg:
 
 第二步： 假设情景代入方法。
 
+4： 学习本质
 
+在学习的过程中，我们需要反复的掌握本质。
 
-
-![JAVA_REVIEWAD11.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD11.png?raw=true)
-![JAVA_REVIEWAD12.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD12.png?raw=true)
-![JAVA_REVIEWAD13.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD13.png?raw=true)
-![JAVA_REVIEWAD14.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD14.png?raw=true)
-![JAVA_REVIEWAD15.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD15.png?raw=true)
-![JAVA_REVIEWAD16.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD16.png?raw=true)
 ![JAVA_REVIEWAD17.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD17.png?raw=true)
-![JAVA_REVIEWAD18.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD18.png?raw=true)
-![JAVA_REVIEWAD19.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD19.png?raw=true)
-![JAVA_REVIEWAD20.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD20.png?raw=true)
-![JAVA_REVIEWAD21.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD21.png?raw=true)
-![JAVA_REVIEWAD22.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD22.png?raw=true)
-![JAVA_REVIEWAD23.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD23.png?raw=true)
-![JAVA_REVIEWAD24.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD24.png?raw=true)
-![JAVA_REVIEWAD25.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD25.png?raw=true)
-![JAVA_REVIEWAD26.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD26.png?raw=true)
-![JAVA_REVIEWAD27.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD27.png?raw=true)
-![JAVA_REVIEWAD28.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD28.png?raw=true)
-![JAVA_REVIEWAD29.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD29.png?raw=true)
-![JAVA_REVIEWAD30.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD30.png?raw=true)
-![JAVA_REVIEWAD31.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD31.png?raw=true)
-![JAVA_REVIEWAD32.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD32.png?raw=true)
-![JAVA_REVIEWAD33.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD33.png?raw=true)
-![JAVA_REVIEWAD34.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD34.png?raw=true)
-![JAVA_REVIEWAD35.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD35.png?raw=true)
+
+
+
+
+
+
+
+
 ![JAVA_REVIEWAD36.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD36.png?raw=true)
 ![JAVA_REVIEWAD37.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD37.png?raw=true)
 ![JAVA_REVIEWAD38.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD38.png?raw=true)
