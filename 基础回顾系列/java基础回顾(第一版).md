@@ -659,7 +659,9 @@ stream是延迟操作： 中间操作类似于书写sql语句(并不会去执行
 Optional  如何避免空指针异常：
 
 ```
-
+ Optional类：为了在程序中避免出现空指针异常而创建的。
+ 常用的方法：ofNullable(T t)
+            orElse(T t)
 ```
 
 ![JAVA_REVIEWAD31.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD31.png?raw=true)
