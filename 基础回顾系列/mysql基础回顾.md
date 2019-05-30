@@ -461,7 +461,23 @@ WHERE e.`manager_id`=m.`employee_id`;
 
 ![MYSQL_REVIEWAD54.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD54.png?raw=true)
 
+any 一般情况下可以替换为min() ，in , all 替换为  max()
+
+ 
+
 ![MYSQL_REVIEWAD55.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD55.png?raw=true)
+
+![MYSQL_REVIEWAD56.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD56.png?raw=true)
+
+![MYSQL_REVIEWAD57.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD57.png?raw=true)
+
+（如果我们将子查询当做一张表来关联，这个子查询必须取别名）
+
+![MYSQL_REVIEWAD58.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD58.png?raw=true)
+
+![MYSQL_REVIEWAD59.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD59.png?raw=true)
+
+![MYSQL_REVIEWAD60.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD60.png?raw=true)
 
 ### 进阶8：分页查询
 
@@ -499,7 +515,7 @@ limit 【起始的条目索引，】条目数;
 ##进阶9：联合查询
 
 引入：
-	union 联合、合并
+​	union 联合、合并
 
 语法：
 
@@ -524,11 +540,6 @@ select 字段|常量|表达式|函数 【from 表】 【where 条件】
 
 
 
-![MYSQL_REVIEWAD56.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD56.png?raw=true)
-![MYSQL_REVIEWAD57.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD57.png?raw=true)
-![MYSQL_REVIEWAD58.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD58.png?raw=true)
-![MYSQL_REVIEWAD59.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD59.png?raw=true)
-![MYSQL_REVIEWAD60.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD60.png?raw=true)
 ![MYSQL_REVIEWAD61.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD61.png?raw=true)
 ![MYSQL_REVIEWAD62.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD62.png?raw=true)
 ![MYSQL_REVIEWAD63.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD63.png?raw=true)
