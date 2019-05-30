@@ -85,13 +85,19 @@ null 和任何字段拼接，他的结构都是null.
 ![MYSQL_REVIEWAD6.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD6.png?raw=true)
 
 ​	条件查询：根据条件过滤原始表的数据，查询到想要的数据
-​	语法：
-​	select 
-​		要查询的字段|表达式|常量值|函数
-​	from 
-​		表
-​	where 
-​		条件 ;
+
+```
+	语法：
+	select 
+		要查询的字段|表达式|常量值|函数  （3）
+ 	from 
+		表 （1）
+	where 
+		条件 ;  （2）
+# 查询语句的执行顺序是 先 （1） (2) (3) 
+```
+
+
 
 ```
 分类：
@@ -111,6 +117,10 @@ null 和任何字段拼接，他的结构都是null.
 
 三、模糊查询
 示例：last_name like 'a%'
+
+where 关键字：
+where关键字表示多from 的原始表中的字段进行筛选。 所以where后面的字段必须是存在于原始表中的。
+sql语句的执行顺序也是按照先from表，后where 条件。 后面无论是多复杂都是遵照的这个原则
 ```
 
 案例：
@@ -261,37 +271,73 @@ date_format将日期转换成字符
 	5  分组函数中的字段一般要求是group by 的字段
 ```
 
-![MYSQL_REVIEWAD30.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD30.png?raw=true)
+
 
 ### 进阶5：分组查询
 
-​	语法：
-​	select 查询的字段，分组函数
-​	from 表
-​	group by 分组的字段
-​	
-​	
+```
+	语法：
+	select 查询的字段，分组函数
+	from 表
+	group by 分组的字段
+	having  分组后过滤条件
+```
+
+
 
 ```
 特点：
 1、可以按单个字段分组
 2、和分组函数一同查询的字段最好是分组后的字段
 3、分组筛选
-		针对的表	位置			关键字
+		    数据源    	  位置			关键字
 分组前筛选：	原始表		group by的前面		where
 分组后筛选：	分组后的结果集	group by的后面		having
+分组函数做条件肯定放在having字句中
+能用分组前筛选，优先考虑使用分组前
 
 4、可以按多个字段分组，字段之间用逗号隔开
 5、可以支持排序
 6、having后可以支持别名
 ```
 
-##进阶6：多表连接查询
+![MYSQL_REVIEWAD30.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD30.png?raw=true)	
+
+![MYSQL_REVIEWAD31.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD31.png?raw=true)
+
+![MYSQL_REVIEWAD32.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD32.png?raw=true)
+
+![MYSQL_REVIEWAD33.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD33.png?raw=true)
+
+对于复杂的查询：我们先分解查询条件。
+
+1： 去掉筛选条件查得子集
+
+2： 加上筛选条件
+
+![MYSQL_REVIEWAD34.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD34.png?raw=true)
+
+![MYSQL_REVIEWAD35.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD35.png?raw=true)
+
+![MYSQL_REVIEWAD36.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD36.png?raw=true)
+
+按照多个字段分组
+
+![MYSQL_REVIEWAD37.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD37.png?raw=true)
+
+### 进阶6：多表连接查询
+
+![MYSQL_REVIEWAD38.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD38.png?raw=true)
 
 ```
 笛卡尔乘积：如果连接条件省略或无效则会出现
 解决办法：添加上连接条件
 ```
+
+
+![MYSQL_REVIEWAD39.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD39.png?raw=true)
+
+![MYSQL_REVIEWAD40.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD40.png?raw=true) 
 
 一、传统模式下的连接 ：等值连接——非等值连接
 
@@ -302,14 +348,18 @@ date_format将日期转换成字符
 4.一般为表起别名，提高阅读性和性能
 ```
 
-二、sql99语法：通过join关键字实现连接
+
+
+二、通过join关键字实现连接
 
 ```
 含义：1999年推出的sql语法
 支持：
-等值连接、非等值连接 （内连接）
-外连接
-交叉连接
+等值连接、非等值连接 （内连接--求集合交集） 
+外连接 ： 一般来说是用来查询一个表中有(主表)，另外一个表中没有的数据(从表)
+         主表中的每一条记录都会显示出来。 主要想查询谁，谁就是主表
+全外连接 ： mysql 不支持全连接
+交叉连接 ： 笛卡尔乘积，就类似“，” 号
 
 语法：
 
@@ -325,7 +375,26 @@ from 表1
 好处：语句上，连接条件和筛选条件实现了分离，简洁明了！
 ```
 
-​	
+![MYSQL_REVIEWAD42.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD42.png?raw=true)
+
+![MYSQL_REVIEWAD41.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD41.png?raw=true)  
+
+![MYSQL_REVIEWAD43.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD43.png?raw=true)
+
+外连接原理：
+
+![MYSQL_REVIEWAD44.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD44.png?raw=true)
+
+![MYSQL_REVIEWAD45.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD45.png?raw=true)
+
+总结：
+
+![MYSQL_REVIEWAD46.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD46.png?raw=true)
+
+![MYSQL_REVIEWAD47.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD47.png?raw=true)
+
+![MYSQL_REVIEWAD48.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD48.png?raw=true)
+
 三、自连接
 
 案例：查询员工名和直接上级的名称
@@ -346,43 +415,212 @@ FROM employees e,employees m
 WHERE e.`manager_id`=m.`employee_id`;
 ```
 
-##进阶7：子查询
-
 ​	
 
+### 进阶7：子查询
 
 
 
+含义：
 
+```
+一条查询语句中又嵌套了另一条完整的select语句，其中被嵌套的select语句，称为子查询或内查询
+在外面的查询语句，称为主查询或外查询
+```
 
-
-
-
-
-
-
-
-
-![MYSQL_REVIEWAD31.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD31.png?raw=true)
-![MYSQL_REVIEWAD32.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD32.png?raw=true)
-![MYSQL_REVIEWAD33.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD33.png?raw=true)
-![MYSQL_REVIEWAD34.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD34.png?raw=true)
-![MYSQL_REVIEWAD35.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD35.png?raw=true)
-![MYSQL_REVIEWAD36.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD36.png?raw=true)
-![MYSQL_REVIEWAD37.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD37.png?raw=true)
-![MYSQL_REVIEWAD38.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD38.png?raw=true)
-![MYSQL_REVIEWAD39.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD39.png?raw=true)
-![MYSQL_REVIEWAD40.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD40.png?raw=true)
-![MYSQL_REVIEWAD41.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD41.png?raw=true)
-![MYSQL_REVIEWAD42.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD42.png?raw=true)
-![MYSQL_REVIEWAD43.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD43.png?raw=true)
-![MYSQL_REVIEWAD44.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD44.png?raw=true)
-![MYSQL_REVIEWAD45.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD45.png?raw=true)
-![MYSQL_REVIEWAD46.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD46.png?raw=true)
-![MYSQL_REVIEWAD47.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD47.png?raw=true)
-![MYSQL_REVIEWAD48.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD48.png?raw=true)
 ![MYSQL_REVIEWAD49.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD49.png?raw=true)
+
+特点：
+
+```
+1、子查询都放在小括号内
+2、子查询可以放在from后面、select后面、where后面、having后面，但一般放在条件的右侧
+3、子查询优先于主查询执行，主查询使用了子查询的执行结果
+4、子查询根据查询结果的行数不同分为以下两类：
+① 单行子查询
+	结果集只有一行
+	一般搭配单行操作符使用：> < = <> >= <= 
+	非法使用子查询的情况：
+	a、子查询的结果为一组值
+	b、子查询的结果为空
+	
+② 多行子查询
+	结果集有多行
+	一般搭配多行操作符使用：any、all、in、not in
+	in： 属于子查询结果中的任意一个就行
+	any和all往往可以用其他查询代替
+```
+
 ![MYSQL_REVIEWAD50.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD50.png?raw=true)
+
+![MYSQL_REVIEWAD51.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD51.png?raw=true)
+
+![MYSQL_REVIEWAD52.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD52.png?raw=true)
+
+![MYSQL_REVIEWAD53.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD53.png?raw=true)
+
+![MYSQL_REVIEWAD54.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD54.png?raw=true)
+
+![MYSQL_REVIEWAD55.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD55.png?raw=true)
+
+### 进阶8：分页查询
+
+应用场景：
+
+```
+实际的web项目中需要根据用户的需求提交对应的分页查询的sql语句
+```
+
+语法：
+
+```
+select 字段|表达式,...
+from 表
+【where 条件】
+【group by 分组字段】
+【having 条件】
+【order by 排序的字段】
+limit 【起始的条目索引，】条目数;
+```
+
+特点：
+
+```
+1.起始条目索引从0开始
+
+2.limit子句放在查询语句的最后
+
+3.公式：select * from  表 limit （page-1）*sizePerPage,sizePerPage
+假如:
+每页显示条目数sizePerPage
+要显示的页数 page
+```
+
+##进阶9：联合查询
+
+引入：
+	union 联合、合并
+
+语法：
+
+```
+select 字段|常量|表达式|函数 【from 表】 【where 条件】 union 【all】
+select 字段|常量|表达式|函数 【from 表】 【where 条件】 union 【all】
+select 字段|常量|表达式|函数 【from 表】 【where 条件】 union  【all】
+.....
+select 字段|常量|表达式|函数 【from 表】 【where 条件】
+```
+
+特点：
+
+```
+1、多条查询语句的查询的列数必须是一致的
+2、多条查询语句的查询的列的类型几乎相同
+3、union代表去重，union all代表不去重
+```
+
+##DML语言
+
+
+
+
+![MYSQL_REVIEWAD56.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD56.png?raw=true)
+![MYSQL_REVIEWAD57.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD57.png?raw=true)
+![MYSQL_REVIEWAD58.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD58.png?raw=true)
+![MYSQL_REVIEWAD59.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD59.png?raw=true)
+![MYSQL_REVIEWAD60.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD60.png?raw=true)
+![MYSQL_REVIEWAD61.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD61.png?raw=true)
+![MYSQL_REVIEWAD62.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD62.png?raw=true)
+![MYSQL_REVIEWAD63.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD63.png?raw=true)
+![MYSQL_REVIEWAD64.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD64.png?raw=true)
+![MYSQL_REVIEWAD65.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD65.png?raw=true)
+![MYSQL_REVIEWAD66.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD66.png?raw=true)
+![MYSQL_REVIEWAD67.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD67.png?raw=true)
+![MYSQL_REVIEWAD68.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD68.png?raw=true)
+![MYSQL_REVIEWAD69.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD69.png?raw=true)
+![MYSQL_REVIEWAD70.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD70.png?raw=true)
+![MYSQL_REVIEWAD71.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD71.png?raw=true)
+![MYSQL_REVIEWAD72.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD72.png?raw=true)
+![MYSQL_REVIEWAD73.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD73.png?raw=true)
+![MYSQL_REVIEWAD74.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD74.png?raw=true)
+![MYSQL_REVIEWAD75.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD75.png?raw=true)
+![MYSQL_REVIEWAD76.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD76.png?raw=true)
+![MYSQL_REVIEWAD77.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD77.png?raw=true)
+![MYSQL_REVIEWAD78.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD78.png?raw=true)
+![MYSQL_REVIEWAD79.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD79.png?raw=true)
+![MYSQL_REVIEWAD80.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD80.png?raw=true)
+![MYSQL_REVIEWAD81.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD81.png?raw=true)
+![MYSQL_REVIEWAD82.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD82.png?raw=true)
+![MYSQL_REVIEWAD83.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD83.png?raw=true)
+![MYSQL_REVIEWAD84.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD84.png?raw=true)
+![MYSQL_REVIEWAD85.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD85.png?raw=true)
+![MYSQL_REVIEWAD86.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD86.png?raw=true)
+![MYSQL_REVIEWAD87.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD87.png?raw=true)
+![MYSQL_REVIEWAD88.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD88.png?raw=true)
+![MYSQL_REVIEWAD89.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD89.png?raw=true)
+![MYSQL_REVIEWAD90.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD90.png?raw=true)
+![MYSQL_REVIEWAD91.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD91.png?raw=true)
+![MYSQL_REVIEWAD92.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD92.png?raw=true)
+![MYSQL_REVIEWAD93.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD93.png?raw=true)
+![MYSQL_REVIEWAD94.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD94.png?raw=true)
+![MYSQL_REVIEWAD95.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD95.png?raw=true)
+![MYSQL_REVIEWAD96.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD96.png?raw=true)
+![MYSQL_REVIEWAD97.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD97.png?raw=true)
+![MYSQL_REVIEWAD98.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD98.png?raw=true)
+![MYSQL_REVIEWAD99.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD99.png?raw=true)
+![MYSQL_REVIEWAD100.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD100.png?raw=true)
+![MYSQL_REVIEWAD101.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD101.png?raw=true)
+![MYSQL_REVIEWAD102.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD102.png?raw=true)
+![MYSQL_REVIEWAD103.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD103.png?raw=true)
+![MYSQL_REVIEWAD104.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD104.png?raw=true)
+![MYSQL_REVIEWAD105.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD105.png?raw=true)
+![MYSQL_REVIEWAD106.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD106.png?raw=true)
+![MYSQL_REVIEWAD107.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD107.png?raw=true)
+![MYSQL_REVIEWAD108.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD108.png?raw=true)
+![MYSQL_REVIEWAD109.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD109.png?raw=true)
+![MYSQL_REVIEWAD110.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD110.png?raw=true)
+![MYSQL_REVIEWAD111.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD111.png?raw=true)
+![MYSQL_REVIEWAD112.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD112.png?raw=true)
+![MYSQL_REVIEWAD113.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD113.png?raw=true)
+![MYSQL_REVIEWAD114.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD114.png?raw=true)
+![MYSQL_REVIEWAD115.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD115.png?raw=true)
+![MYSQL_REVIEWAD116.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD116.png?raw=true)
+![MYSQL_REVIEWAD117.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD117.png?raw=true)
+![MYSQL_REVIEWAD118.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD118.png?raw=true)
+![MYSQL_REVIEWAD119.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD119.png?raw=true)
+![MYSQL_REVIEWAD120.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD120.png?raw=true)
+![MYSQL_REVIEWAD121.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD121.png?raw=true)
+![MYSQL_REVIEWAD122.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD122.png?raw=true)
+![MYSQL_REVIEWAD123.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD123.png?raw=true)
+![MYSQL_REVIEWAD124.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD124.png?raw=true)
+![MYSQL_REVIEWAD125.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD125.png?raw=true)
+![MYSQL_REVIEWAD126.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD126.png?raw=true)
+![MYSQL_REVIEWAD127.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD127.png?raw=true)
+![MYSQL_REVIEWAD128.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD128.png?raw=true)
+![MYSQL_REVIEWAD129.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD129.png?raw=true)
+![MYSQL_REVIEWAD130.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD130.png?raw=true)
+![MYSQL_REVIEWAD131.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD131.png?raw=true)
+![MYSQL_REVIEWAD132.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD132.png?raw=true)
+![MYSQL_REVIEWAD133.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD133.png?raw=true)
+![MYSQL_REVIEWAD134.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD134.png?raw=true)
+![MYSQL_REVIEWAD135.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD135.png?raw=true)
+![MYSQL_REVIEWAD136.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD136.png?raw=true)
+![MYSQL_REVIEWAD137.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD137.png?raw=true)
+![MYSQL_REVIEWAD138.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD138.png?raw=true)
+![MYSQL_REVIEWAD139.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD139.png?raw=true)
+![MYSQL_REVIEWAD140.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD140.png?raw=true)
+![MYSQL_REVIEWAD141.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD141.png?raw=true)
+![MYSQL_REVIEWAD142.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD142.png?raw=true)
+![MYSQL_REVIEWAD143.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD143.png?raw=true)
+![MYSQL_REVIEWAD144.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD144.png?raw=true)
+![MYSQL_REVIEWAD145.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD145.png?raw=true)
+![MYSQL_REVIEWAD146.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD146.png?raw=true)
+![MYSQL_REVIEWAD147.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD147.png?raw=true)
+![MYSQL_REVIEWAD148.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD148.png?raw=true)
+![MYSQL_REVIEWAD149.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD149.png?raw=true)
+![MYSQL_REVIEWAD150.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD150.png?raw=true)
+
+
 
 
 
