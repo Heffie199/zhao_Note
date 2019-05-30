@@ -242,8 +242,6 @@ date_format将日期转换成字符
 
 ## 二、分组函数
 
-![MYSQL_REVIEWAD30.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD30.png?raw=true)
-
 ```
 	sum 求和
 	max 最大值
@@ -259,8 +257,11 @@ date_format将日期转换成字符
 	4、count的参数可以支持：
 		字段、*、常量值，一般放1
 
-	   建议使用 count(*)
+	   建议使用 count(*) 来统计行数
+	5  分组函数中的字段一般要求是group by 的字段
 ```
+
+![MYSQL_REVIEWAD30.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/MYSQL_REVIEWAD30.png?raw=true)
 
 ### 进阶5：分组查询
 
