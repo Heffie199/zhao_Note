@@ -696,6 +696,10 @@ eg:
 
 ![JAVA_REVIEWAD17.png](https://github.com/zhaodahan/zhao_Note/blob/master/wiki_img/JAVA_REVIEWAD17.png?raw=true)
 
+5 ： 在我们总结公式的时候
+
+在不知道规律的时候，使用举例法。 一般举3条例子， 从中总结出规律。
+
 
 
 
